@@ -8,8 +8,20 @@
 import SwiftUI
 
 struct IPhoneScreenView: View {
+    @StateObject private var viewModel = BaseAuthViewModel()
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        GeometryReader { geometry in
+            ZStack {
+                Color.backGround
+                    .edgesIgnoringSafeArea(.all)
+                    ReadyScreenView(
+                        viewModel: viewModel,
+                        topTextFont: .title2, // Передаём нужный шрифт
+                        underTopTextFormFont: .footnote, showLogo: true // Передаём нужный шрифт
+                    )
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                }
+        }
     }
 }
 

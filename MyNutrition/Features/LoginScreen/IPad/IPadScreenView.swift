@@ -22,8 +22,12 @@ struct IPadScreenView: View {
                             .scaledToFill()
                             .frame(width: geometry.size.width, height: geometry.size.height * 0.4, alignment: .center)
                             .edgesIgnoringSafeArea(.top)
-                        ReadyScreenView(viewModel: viewModel)
-                            .frame(width: geometry.size.width)
+                        ReadyScreenView(
+                            viewModel: viewModel,
+                            topTextFont: .largeTitle, // Передаём нужный шрифт
+                            underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                        )
+                        .frame(width: geometry.size.width)
                         Spacer()
                     }
                     .ignoresSafeArea(.keyboard)
@@ -34,8 +38,12 @@ struct IPadScreenView: View {
                             .scaledToFill()
                             .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
                         
-                        ReadyScreenView(viewModel: viewModel)
-                                .frame(width: geometry.size.width * 0.5)
+                        ReadyScreenView(
+                            viewModel: viewModel,
+                            topTextFont: .largeTitle, // Передаём нужный шрифт
+                            underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                        )
+                        .frame(width: geometry.size.width * 0.5)
                     }
                     .ignoresSafeArea(.keyboard)
                 }

@@ -9,16 +9,22 @@ import SwiftUI
 
 struct ReadyScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
+     var topTextFont: Font
+     var underTopTextFormFont: Font
+     var showLogo: Bool
     var body: some View {
         VStack(spacing: 15) {
             Spacer()
+            Image(showLogo == true ? "LogoIcon" : "NoImage")
+                .renderingMode(.template)
+                .foregroundStyle(.text)
             Text("Welcome to MyNutrition")
-                .font(.largeTitle)
+                .font(topTextFont)
                 .fontWeight(.medium)
                 .foregroundStyle(.text)
             
             Text("Enter your email and password or access your account")
-                .font(.title2)
+                .font(underTopTextFormFont)
                 .foregroundStyle(.subText)
                 .padding(.bottom, 10)
             
@@ -40,7 +46,7 @@ struct ReadyScreenView: View {
             } label: {
                 Text("Register")
             }
-            .getCustomButtonStyle(width: 350, height: 50, textColor: .black, backGroundColor: .gray, cornerRadius: 15)
+            .getCustomButtonStyle(width: 350, height: 50, textColor: .text, backGroundColor: .textField, cornerRadius: 15)
             
             Button {
                 print("Sign in with Apple")
