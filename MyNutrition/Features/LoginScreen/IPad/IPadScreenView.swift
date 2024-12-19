@@ -22,6 +22,7 @@ struct IPadScreenView: View {
                             .scaledToFill()
                             .frame(width: geometry.size.width, height: geometry.size.height * 0.4, alignment: .center)
                             .edgesIgnoringSafeArea(.top)
+                            .accessibilityIdentifier("compactScreen")
                         ReadyScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
@@ -37,7 +38,7 @@ struct IPadScreenView: View {
                             .resizable()
                             .scaledToFill()
                             .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
-                        
+                            .accessibilityIdentifier("screenRegular")
                         ReadyScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт

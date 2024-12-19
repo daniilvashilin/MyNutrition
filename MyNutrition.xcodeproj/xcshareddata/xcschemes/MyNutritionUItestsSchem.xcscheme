@@ -19,9 +19,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A5EB9BAF2D1310F90039D18B"
-               BuildableName = "MyNutritionLoginScreenUITests.xctest"
-               BlueprintName = "MyNutritionLoginScreenUITests"
+               BlueprintIdentifier = "A5EB9BBE2D1481230039D18B"
+               BuildableName = "MyNutritionUITests.xctest"
+               BlueprintName = "MyNutritionUITests"
                ReferencedContainer = "container:MyNutrition.xcodeproj">
             </BuildableReference>
          </TestableReference>

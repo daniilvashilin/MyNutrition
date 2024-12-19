@@ -1,13 +1,13 @@
 //
-//  MyNutritionLoginScreenUITestsLaunchTests.swift
-//  MyNutritionLoginScreenUITests
+//  MyNutritionUITestsLaunchTests.swift
+//  MyNutritionUITests
 //
-//  Created by Daniil on 18/12/2024.
+//  Created by Daniil on 19/12/2024.
 //
 
 import XCTest
 
-final class MyNutritionLoginScreenUITestsLaunchTests: XCTestCase {
+final class MyNutritionUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
