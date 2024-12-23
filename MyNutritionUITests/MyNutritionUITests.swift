@@ -6,8 +6,7 @@
 //
 
 import XCTest
-import SnapshotTesting
-import InlineSnapshotTesting
+
 
 final class MyNutritionUITests: XCTestCase {
 

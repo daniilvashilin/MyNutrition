@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct IPhoneScreenView: View {
-    @StateObject private var viewModel = BaseAuthViewModel()
+    @Environment(\.horizontalSizeClass) var sizeClass
+    @ObservedObject var viewModel: BaseAuthViewModel
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -25,6 +26,4 @@ struct IPhoneScreenView: View {
     }
 }
 
-#Preview {
-    IPhoneScreenView()
-}
+

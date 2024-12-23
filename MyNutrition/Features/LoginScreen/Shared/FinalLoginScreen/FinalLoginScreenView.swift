@@ -9,11 +9,12 @@ import SwiftUI
 
 struct FinalLoginScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
+    @StateObject private var viewModel = BaseAuthViewModel()
       var body: some View {
           if sizeClass == .compact {
-              IPhoneScreenView()
+              IPhoneScreenView(viewModel: viewModel)
           } else if sizeClass == .regular {
-              IPadScreenView()
+              IPadScreenView(viewModel: viewModel)
           }
       }
   }

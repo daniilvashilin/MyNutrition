@@ -36,6 +36,13 @@ struct ReadyScreenView: View {
             
             Button {
                 print("Sign in tapped")
+                Task {
+                    do {
+                        try await viewModel.signInWithEmail()
+                    } catch {
+                        print("Login failed: \(String(describing: viewModel.errorMessage))")
+                    }
+                }
             } label: {
                 Text("Sign in")
             }
