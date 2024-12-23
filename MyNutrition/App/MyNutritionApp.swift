@@ -19,10 +19,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct MyNutritionApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var baseAuthViewModel = BaseAuthViewModel()
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                FinalLoginScreenView()
+                if baseAuthViewModel.isLoading {
+                    LoadingScreenView()
+                } else if baseAuthViewModel.isAuthenticated {
+                    TestHomePageView()
+                } else {
+                    FinalLoginScreenView()
+                }
             }
         }
     }

@@ -18,6 +18,24 @@ class BaseAuthViewModel: ObservableObject {
     @Published var isAuthenticated: Bool = false
     @Published var successMessage: String?
     
+    private func startAuthListener() {
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                // Только если пользователь изменился, обновляем состояние
+                let wasAuthenticated = self.isAuthenticated
+                self.isAuthenticated = (user != nil)
+                
+                if wasAuthenticated != self.isAuthenticated {
+                    print("Listener: Authentication state changed: \(self.isAuthenticated)")
+                }
+                
+                self.isLoading = false
+            }
+        }
+    }
+    
     enum errorHandle: LocalizedError {
         case invalidEmailOrPassword
         case emailAlreadyInUse
@@ -60,6 +78,8 @@ class BaseAuthViewModel: ObservableObject {
             return errorHandle.invalidPassword.errorDescription ?? "Invalid password"
         case AuthErrorCode.emailAlreadyInUse.rawValue:
             return errorHandle.emailAlreadyInUse.errorDescription ?? "Email already in use"
+        case AuthErrorCode.userMismatch.rawValue:  // Добавляем обработку ошибки 17004
+            return "User credentials do not match. Please check your email and password."
         default:
             assertionFailure("Unhandled Firebase error: \(error.code)")
             return errorHandle.unexpectedError.errorDescription ?? "Unexpected error"
@@ -99,7 +119,7 @@ class BaseAuthViewModel: ObservableObject {
            }
         do {
             let user = try await authService.signInWithEmail(email: email, password: password)
-            isAuthenticated = true
+//            isAuthenticated = true
             print("user: \(String(describing: user.email)) has loged in with ID: \(user.uid)")
             logSuccess("user: \(String(describing: user.email)) has been created with ID: \(user.uid)")
         } catch let error as NSError {
