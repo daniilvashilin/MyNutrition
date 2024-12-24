@@ -16,19 +16,28 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
+class AppState: ObservableObject {
+    @Published var showRegisterScreen: Bool = false
+}
+
 @main
 struct MyNutritionApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var baseAuthViewModel = BaseAuthViewModel()
+    @StateObject private var appState = AppState() // Глобальное состояние приложения
+    
     var body: some Scene {
         WindowGroup {
+            NavigationStack {
                 if baseAuthViewModel.isLoading {
                     LoadingScreenView()
                 } else if baseAuthViewModel.isAuthenticated {
                     TestHomePageView(viewModel: baseAuthViewModel)
                 } else {
                     FinalLoginScreenView()
+                        .environmentObject(appState) // Передача состояния в приложение
                 }
             }
+        }
     }
 }

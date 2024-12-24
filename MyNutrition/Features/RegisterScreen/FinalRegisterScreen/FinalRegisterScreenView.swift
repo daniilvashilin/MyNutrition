@@ -9,7 +9,7 @@ import SwiftUI
 
 struct FinalRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
-    @StateObject private var viewModel = BaseAuthViewModel()
+    @ObservedObject var viewModel: BaseAuthViewModel
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         if sizeClass == .compact {
@@ -18,8 +18,4 @@ struct FinalRegisterScreenView: View {
             IPadRegisterScreenView(viewModel: viewModel)
         }
     }
-}
-
-#Preview {
-    FinalRegisterScreenView()
 }
