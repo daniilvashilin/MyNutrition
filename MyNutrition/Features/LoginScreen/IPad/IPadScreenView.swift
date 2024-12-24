@@ -23,7 +23,7 @@ struct IPadScreenView: View {
                             .frame(width: geometry.size.width, height: geometry.size.height * 0.4, alignment: .center)
                             .edgesIgnoringSafeArea(.top)
                             .accessibilityIdentifier("compactScreen")
-                        ReadyScreenView(
+                        ReadyLoginScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
                             underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
@@ -36,16 +36,18 @@ struct IPadScreenView: View {
                     HStack(spacing: 0) {
                         Image(.screenRegular)
                             .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
+                               .scaledToFill()
+                               .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
+                               .ignoresSafeArea()
                             .accessibilityIdentifier("screenRegular")
-                        ReadyScreenView(
+                        ReadyLoginScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
                             underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
                         )
-                        .frame(width: geometry.size.width * 0.5)
+                        .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
                     }
+                    .ignoresSafeArea()
                     .ignoresSafeArea(.keyboard)
                 }
             }

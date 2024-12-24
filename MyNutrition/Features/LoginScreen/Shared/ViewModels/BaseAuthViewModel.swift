@@ -14,25 +14,42 @@ class BaseAuthViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var errorMessage: String?
+    @Published var passwordConfirmation: String = ""
     @Published var isLoading: Bool = false
     @Published var isAuthenticated: Bool = false
     @Published var successMessage: String?
+    private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
+    
+    init() {
+        startAuthListener()
+    }
     
     private func startAuthListener() {
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                
-                // Только если пользователь изменился, обновляем состояние
                 let wasAuthenticated = self.isAuthenticated
                 self.isAuthenticated = (user != nil)
-                
                 if wasAuthenticated != self.isAuthenticated {
                     print("Listener: Authentication state changed: \(self.isAuthenticated)")
                 }
-                
                 self.isLoading = false
             }
+        }
+    }
+    
+    // Delte the listener if not need
+    deinit {
+        if let handle = authStateListenerHandle {
+            Auth.auth().removeStateDidChangeListener(handle)
+            print("Listener removed in deinit")
+        }
+    }
+    func stopAuthListener() {
+        if let handle = authStateListenerHandle {
+            Auth.auth().removeStateDidChangeListener(handle)
+            print("Listener removed manually")
+            authStateListenerHandle = nil  // Очищаем handle
         }
     }
     
@@ -42,6 +59,7 @@ class BaseAuthViewModel: ObservableObject {
         case invalidEmail
         case invalidPassword
         case weakPassword
+        case userMismatch
         case unexpectedError
         var errorDescription: String? {
             switch self {
@@ -51,6 +69,7 @@ class BaseAuthViewModel: ObservableObject {
             case .weakPassword: return "Weak password"
             case .unexpectedError: return "Fatal error occurred"
             case .emailAlreadyInUse: return "This email is already in use. Please try another."
+            case .userMismatch: return "User credentials do not match. Please check your email and password"
             }
         }
     }
@@ -59,7 +78,7 @@ class BaseAuthViewModel: ObservableObject {
         case login
         case registration
         case logout
-
+        
         var message: String {
             switch self {
             case .login: return "Successfully logged in."
@@ -78,10 +97,10 @@ class BaseAuthViewModel: ObservableObject {
             return errorHandle.invalidPassword.errorDescription ?? "Invalid password"
         case AuthErrorCode.emailAlreadyInUse.rawValue:
             return errorHandle.emailAlreadyInUse.errorDescription ?? "Email already in use"
-        case AuthErrorCode.userMismatch.rawValue:  // Добавляем обработку ошибки 17004
+        case AuthErrorCode.userMismatch.rawValue:
             return "User credentials do not match. Please check your email and password."
         default:
-            assertionFailure("Unhandled Firebase error: \(error.code)")
+            print("Unhandled Firebase error: \(error.code)")
             return errorHandle.unexpectedError.errorDescription ?? "Unexpected error"
         }
     }
@@ -97,8 +116,8 @@ class BaseAuthViewModel: ObservableObject {
         errorMessage = nil
         
         defer {
-               isLoading = false  // Этот код гарантированно выполнится в конце
-           }
+            isLoading = false  // Этот код гарантированно выполнится в конце
+        }
         do {
             let user = try await authService.createUserWithEmail(email: email, password: password)
             isAuthenticated = true
@@ -115,11 +134,11 @@ class BaseAuthViewModel: ObservableObject {
         errorMessage = nil
         
         defer {
-               isLoading = false  // Этот код гарантированно выполнится в конце
-           }
+            isLoading = false  // Этот код гарантированно выполнится в конце
+        }
         do {
             let user = try await authService.signInWithEmail(email: email, password: password)
-//            isAuthenticated = true
+            //            isAuthenticated = true
             print("user: \(String(describing: user.email)) has loged in with ID: \(user.uid)")
             logSuccess("user: \(String(describing: user.email)) has been created with ID: \(user.uid)")
         } catch let error as NSError {

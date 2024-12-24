@@ -15,7 +15,7 @@ struct IPhoneScreenView: View {
             ZStack {
                 Color.backGround
                     .edgesIgnoringSafeArea(.all)
-                    ReadyScreenView(
+                    ReadyLoginScreenView(
                         viewModel: viewModel,
                         topTextFont: .title2, // Передаём нужный шрифт
                         underTopTextFormFont: .footnote, showLogo: true // Передаём нужный шрифт

@@ -22,15 +22,14 @@ struct MyNutritionApp: App {
     @StateObject private var baseAuthViewModel = BaseAuthViewModel()
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
                 if baseAuthViewModel.isLoading {
                     LoadingScreenView()
                 } else if baseAuthViewModel.isAuthenticated {
-                    TestHomePageView()
+                    TestHomePageView(viewModel: baseAuthViewModel)
                 } else {
+                    
                     FinalLoginScreenView()
                 }
-            }
         }
     }
 }
