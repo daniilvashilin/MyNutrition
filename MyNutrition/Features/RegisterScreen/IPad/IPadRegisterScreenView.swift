@@ -9,38 +9,49 @@ import SwiftUI
 
 struct IPadRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
-    //    @ObservedObject var viewModel: BaseAuthViewModel
+        @ObservedObject var viewModel: BaseAuthViewModel
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 Color(.backGround)
                     .edgesIgnoringSafeArea(.all)
                 if geometry.size.width < geometry.size.height {
-                    // Ipad LandScape
-                    VStack {
-                        Image(.compactScreen)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width, height: geometry.size.height * 0.4, alignment: .center)
-                            .edgesIgnoringSafeArea(.top)
-                            .accessibilityIdentifier("compactScreen")
+                    VStack(spacing: 15) {
+//                        Image(.compactScreen)
+//                            .resizable()
+//                            .scaledToFill()
+//                            .frame(width: geometry.size.width, height: geometry.size.height * 0.4, alignment: .center)
+//                            .edgesIgnoringSafeArea(.top)
+//                            .accessibilityIdentifier("compactScreen")
+                        ReadyRegisterScreenView(
+                            viewModel: viewModel,
+                            topTextFont: .largeTitle, // Передаём нужный шрифт
+                            underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                        )
+                        .frame(width: geometry.size.width)
+                        Spacer()
                     }
-                    .ignoresSafeArea()
                     .ignoresSafeArea(.keyboard)
-                    
                 } else if geometry.size.width > geometry.size.height  {
-                    // Ipad Portrait
-                    HStack {
-                        
-                    }
-                    .ignoresSafeArea()
-                    .ignoresSafeArea(.keyboard)
+                        HStack(spacing: 0) {
+//                            Image(.screenRegular)
+//                                .resizable()
+//                                .scaledToFill()
+//                                .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
+//                                .ignoresSafeArea()
+//                                .accessibilityIdentifier("screenRegular")
+                            ReadyRegisterScreenView(
+                                viewModel: viewModel,
+                                topTextFont: .largeTitle, // Передаём нужный шрифт
+                                underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                            )
+                            .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
+                        }
+                        .ignoresSafeArea()
+                        .ignoresSafeArea(.keyboard)
                 }
             }
         }
     }
 }
 
-#Preview {
-    IPadRegisterScreenView()
-}

@@ -9,12 +9,16 @@ import SwiftUI
 
 struct IPhoneRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
-//    @ObservedObject var viewModel: BaseAuthViewModel
+    @ObservedObject var viewModel: BaseAuthViewModel
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        GeometryReader { geometry in
+            ZStack {
+                Color.backGround
+                    .edgesIgnoringSafeArea(.all)
+                ReadyRegisterScreenView(viewModel: viewModel, topTextFont: .title2, underTopTextFormFont: .footnote, showLogo: true)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                }
+        }
     }
 }
 
-#Preview {
-    IPhoneRegisterScreenView()
-}

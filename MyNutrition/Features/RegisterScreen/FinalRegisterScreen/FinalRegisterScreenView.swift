@@ -10,11 +10,12 @@ import SwiftUI
 struct FinalRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @StateObject private var viewModel = BaseAuthViewModel()
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         if sizeClass == .compact {
-            IPhoneRegisterScreenView()
+            IPhoneRegisterScreenView(viewModel: viewModel)
         } else if sizeClass == .regular {
-            IPadRegisterScreenView()
+            IPadRegisterScreenView(viewModel: viewModel)
         }
     }
 }

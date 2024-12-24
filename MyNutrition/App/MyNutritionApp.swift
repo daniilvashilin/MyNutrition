@@ -27,9 +27,8 @@ struct MyNutritionApp: App {
                 } else if baseAuthViewModel.isAuthenticated {
                     TestHomePageView(viewModel: baseAuthViewModel)
                 } else {
-                    
                     FinalLoginScreenView()
                 }
-        }
+            }
     }
 }
