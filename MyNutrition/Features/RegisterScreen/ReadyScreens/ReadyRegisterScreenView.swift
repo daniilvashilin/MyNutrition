@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AuthenticationServices
 
 struct ReadyRegisterScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
@@ -13,66 +14,81 @@ struct ReadyRegisterScreenView: View {
     var underTopTextFormFont: Font
     var showLogo: Bool
     
+    @State private var isAuthenticated = false // Состояние для навигации
+    
     var body: some View {
-        VStack(spacing: 15) {
-            Spacer()
-            Text("Welcome to MyNutrition")
-                .font(topTextFont)
-                .fontWeight(.medium)
-                .foregroundStyle(.text)
-            
-            Text("Enter your email and password or access your account")
-                .font(underTopTextFormFont)
-                .foregroundStyle(.subText)
-                .padding(.bottom, 10)
-            
-            // Поля ввода
-            CustomTextFiledVIew(width: formWidth, height: 45, text: $viewModel.email, viewModel: viewModel)
-                .padding(.bottom, 10)
-            
-            CustomSecurFieldView(width: formWidth, height: 45, text: $viewModel.password, viewModel: viewModel)
-                .padding(.bottom, 20)
-            
-            CustomSecurFieldView(width: formWidth, height: 45, text: $viewModel.passwordConfirmation, viewModel: viewModel)
-                .padding(.bottom, 20)
-            
-            Button {
-                print("Register tapped")
-                Task {
-                    do {
-                        try await viewModel.registerWithEmail()
-                    } catch {
-                        print("Register failed: \(String(describing: viewModel.errorMessage))")
+        NavigationStack {
+            VStack(spacing: 15) {
+                Spacer()
+                Text("Welcome to MyNutrition")
+                    .font(topTextFont)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.text)
+                
+                Text("Enter your email and password or access your account")
+                    .font(underTopTextFormFont)
+                    .foregroundStyle(.subText)
+                    .padding(.bottom, 10)
+                
+                // Поля ввода
+                CustomTextFiledVIew(width: formWidth, height: 45, text: $viewModel.email, viewModel: viewModel)
+                    .padding(.bottom, 10)
+                
+                CustomSecurFieldView(width: formWidth, height: 45, text: $viewModel.password, viewModel: viewModel)
+                    .padding(.bottom, 20)
+                
+                CustomSecurFieldView(width: formWidth, height: 45, text: $viewModel.passwordConfirmation, viewModel: viewModel)
+                    .padding(.bottom, 20)
+                
+                Button {
+                    print("Register tapped")
+                    Task {
+                        do {
+                            try await viewModel.registerWithEmail()
+                        } catch {
+                            print("Register failed: \(String(describing: viewModel.errorMessage))")
+                        }
+                    }
+                } label: {
+                    Text("Register")
+                }
+                .getCustomButtonStyle(width: formWidth, height: 45, textColor: .white, backGroundColor: .black, cornerRadius: 15)
+                
+                SignInWithAppleButtonView { result in
+                    switch result {
+                    case .success(let authorization):
+                        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                            AuthService.shared.signInWithApple(credential: appleIDCredential) { result in
+                                switch result {
+                                case .success(let authResult):
+                                    print("Пользователь авторизован: \(authResult.user.uid)")
+                                    DispatchQueue.main.async {
+                                        isAuthenticated = true // Устанавливаем состояние навигации
+                                    }
+                                case .failure(let error):
+                                    print("Ошибка авторизации: \(error.localizedDescription)")
+                                }
+                            }
+                        } else {
+                            print("Неверный тип данных авторизации")
+                        }
+                    case .failure(let error):
+                        print("Ошибка авторизации через Apple: \(error.localizedDescription)")
                     }
                 }
-            } label: {
-                Text("Register")
+                
+                Spacer()
+                
+                Text("Need help ? visit support page 􀬂")
+                    .foregroundStyle(.subText)
+                    .font(.footnote)
             }
-            .getCustomButtonStyle(width: formWidth, height: 45, textColor: .white, backGroundColor: .black, cornerRadius: 15)
-            
-            Button {
-                print("Sign in with Apple")
-            } label: {
-                HStack {
-                    Image(systemName: "apple.logo")
-                        .font(.headline)
-                    Text("Sign in with Apple")
-                }
+            .padding()
+            .background(Color.backGround.edgesIgnoringSafeArea(.all))
+            .navigationDestination(isPresented: $isAuthenticated) {
+                TestHomePageView(viewModel: viewModel) // Переход на экран TestHomePageView
             }
-            .getCustomButtonStyle(width: formWidth, height: 40, textColor: .black, backGroundColor: .white, cornerRadius: 10)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color.text, lineWidth: 2)
-            )
-            
-            Spacer()
-            
-            Text("Need help ? visit support page 􀬂")
-                .foregroundStyle(.subText)
-                .font(.footnote)
         }
-        .padding()
-        .background(Color.backGround.edgesIgnoringSafeArea(.all))
     }
     
     private var formWidth: CGFloat {
