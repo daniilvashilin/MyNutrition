@@ -10,6 +10,7 @@ import AuthenticationServices
 
 struct ReadyRegisterScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
+    @ObservedObject var authService: AuthService
     var topTextFont: Font
     var underTopTextFormFont: Font
     var showLogo: Bool
@@ -86,7 +87,7 @@ struct ReadyRegisterScreenView: View {
             .padding()
             .background(Color.backGround.edgesIgnoringSafeArea(.all))
             .navigationDestination(isPresented: $isAuthenticated) {
-                TestHomePageView(viewModel: viewModel) // Переход на экран TestHomePageView
+                TestHomePageView(viewModel: viewModel, authservice: authService) // Переход на экран TestHomePageView
             }
         }
     }

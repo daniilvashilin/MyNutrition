@@ -9,6 +9,7 @@ import Foundation
 import FirebaseAuth
 import AuthenticationServices
 import CryptoKit
+import FirebaseFirestore
 
 final class AuthService: ObservableObject {
     private var currentNonce: String?
@@ -42,7 +43,6 @@ final class AuthService: ObservableObject {
             }
         }
     }
-    
     struct AuthDataResultModel {
         let uid: String
         let email: String?
@@ -54,26 +54,184 @@ final class AuthService: ObservableObject {
             self.uid = user.uid
         }
     }
-    
     func signInWithEmail(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().signIn(withEmail: email, password: password)
-        return AuthDataResultModel(user: authDataResult.user)
-    }
-    func singInWithGoogle() {
+        let user = authDataResult.user
         
+        // Link to collection `users`
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        // Is user excist in Firestore ?
+        let document = try await userRef.getDocument()
+        
+        if document.exists {
+            // If true the update lastLoginAt
+            try await userRef.updateData(["lastLoginAt": FieldValue.serverTimestamp()])
+        } else {
+            // If false create a new lastLoginAt
+            let userData: [String: Any] = [
+                "uid": user.uid,
+                "email": user.email ?? "",
+                "name": "No Name", // Или добавить поле для имени пользователя
+                "createdAt": FieldValue.serverTimestamp(),
+                "lastLoginAt": FieldValue.serverTimestamp(),
+                "isPremium": false
+            ]
+            try await userRef.setData(userData)
+        }
+        
+        return AuthDataResultModel(user: user)
     }
     // Register
     func createUserWithEmail(email: String, password: String) async throws -> AuthDataResultModel {
         let authDataResult = try await Auth.auth().createUser(withEmail: email, password: password)
-        return AuthDataResultModel(user: authDataResult.user)
-    }
-    
-    func createUserWithGoogle() {
+        let user = authDataResult.user
         
+        // Создаём документ в коллекции `users`
+        let firestoreUser = FirestoreService.User(
+            id: user.uid,
+            email: user.email,
+            name: "No Name",
+            photoURL: nil,
+            providerId: "password",
+            createdAt: Date(),
+            isPremium: false,
+            lastLoginAt: Date()
+        )
+        try await FirestoreService.shared.createOrUpdateUserAsync(user: firestoreUser)
+        
+        // Добавляем начальные данные в коллекцию `nutrition`
+        let nutritionData: [String: Any] = [
+            // Текущие данные (сбрасываются ежедневно)
+            "current": [
+                "caloriesConsumed": 0,
+                "proteinConsumed": 0,
+                "fatConsumed": 0,
+                "carbsConsumed": 0,
+                "sugarConsumed": 0,
+                "fiberConsumed": 0,
+                "move": 0,
+                "exerciseMinutes": 0,
+                "steps": 0
+            ],
+            
+            // Исторические данные (изначально пустые)
+            "history": [],
+            
+            // Цели (изначально 0, пользователь должен их установить)
+            "caloriesGoal": 0,
+            "proteinGoal": 0,
+            "fatGoal": 0,
+            "carbsGoal": 0,
+            "sugarGoal": 0,
+            "fiberGoal": 0,
+            "weightGoal": 0,
+            
+            // Дополнительные данные
+            "lastResetDate": "", // Сохраняем дату последнего сброса
+            "ownerId": user.uid
+        ]
+        let db = Firestore.firestore()
+        try await db.collection("nutrition").document(user.uid).setData(nutritionData)
+        
+        return AuthDataResultModel(user: user)
     }
     // Other
     func signOut() throws {
         try Auth.auth().signOut()
+    }
+    
+    func deleteUserAccount() async {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("Ошибка: пользователь не авторизован")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        
+        do {
+            // Удаляем данные из Firestore
+            try await db.collection("users").document(currentUser.uid).delete()
+            print("Данные пользователя удалены из Firestore")
+        } catch {
+            print("Ошибка при удалении данных из Firestore: \(error.localizedDescription)")
+            return
+        }
+        
+        do {
+            // Удаляем аккаунт из Authentication
+            try await currentUser.delete()
+            print("Пользователь удалён из Firebase Authentication")
+        } catch {
+            print("Ошибка при удалении аккаунта из Firebase Authentication: \(error.localizedDescription)")
+        }
+    }
+    
+    func deleteRelatedData(for uid: String) async throws {
+        let db = Firestore.firestore()
+        
+        // Пример удаления коллекции nutrition
+        let nutritionRef = db.collection("nutrition").whereField("ownerId", isEqualTo: uid)
+        
+        let documents = try await nutritionRef.getDocuments()
+        for document in documents.documents {
+            try await document.reference.delete()
+        }
+        
+        print("Связанные данные пользователя удалены")
+    }
+    
+    func reauthenticateUser(email: String, password: String) async throws {
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        guard let currentUser = Auth.auth().currentUser else { return }
+        
+        try await currentUser.reauthenticate(with: credential)
+        print("Пользователь успешно переавторизован")
+    }
+    
+    func resetDailyDataIfNeeded(uid: String) async throws {
+        let db = Firestore.firestore()
+        let nutritionRef = db.collection("nutrition").document(uid)
+
+        let today = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+
+        let document = try await nutritionRef.getDocument()
+        if var data = document.data() {
+            let lastResetDate = data["lastResetDate"] as? String ?? ""
+
+            if today != lastResetDate {
+                var currentData = data["current"] as? [String: Any] ?? [:]
+                var history = data["history"] as? [[String: Any]] ?? []
+
+                currentData["date"] = today
+                history.append(currentData)
+
+                data["history"] = history
+                data["current"] = [
+                    "caloriesConsumed": 0,
+                    "proteinConsumed": 0,
+                    "fatConsumed": 0,
+                    "carbsConsumed": 0,
+                    "sugarConsumed": 0,
+                    "fiberConsumed": 0,
+                    "move": 0,
+                    "exerciseMinutes": 0,
+                    "steps": 0
+                ]
+                data["lastResetDate"] = today
+
+                try await nutritionRef.setData(data, merge: true)
+            }
+        }
+    }
+    
+    func updateUserGoals(for uid: String, goals: [String: Any]) async throws {
+        let db = Firestore.firestore()
+        let nutritionRef = db.collection("nutrition").document(uid)
+
+        // Обновляем цели
+        try await nutritionRef.updateData(goals)
     }
     
     func generateNonce(length: Int = 32) -> String {
@@ -109,9 +267,42 @@ final class AuthService: ObservableObject {
         return result
     }
     
+    func updateCurrentNutrition(uid: String, updates: [String: Any]) async throws {
+        let db = Firestore.firestore()
+        let nutritionRef = db.collection("nutrition").document(uid)
+
+        for (key, value) in updates {
+            guard let incrementValue = value as? Int else { continue }
+            try await nutritionRef.updateData([
+                "current.\(key)": FieldValue.increment(Int64(incrementValue))
+            ])
+        }
+    }
+    
+    
     func sha256(_ input: String) -> String {
         let inputData = Data(input.utf8)
         let hashedData = SHA256.hash(data: inputData)
         return hashedData.compactMap { String(format: "%02x", $0) }.joined()
+    }
+}
+
+
+extension AuthService {
+    func addUserToFirestore(user: User) async throws {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        // Подготовка данных для Firestore
+        let userData: [String: Any] = [
+            "uid": user.uid,
+            "email": user.email ?? "",
+            "name": "No Name",
+            "createdAt": FieldValue.serverTimestamp(),
+            "isPremium": false,
+        ]
+        
+        // Добавление данных в Firestore
+        try await userRef.setData(userData, merge: true)
     }
 }

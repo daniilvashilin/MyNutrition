@@ -10,6 +10,7 @@ import SwiftUI
 struct IPadScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @ObservedObject var viewModel: BaseAuthViewModel
+    @ObservedObject var authService: AuthService
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -26,7 +27,7 @@ struct IPadScreenView: View {
                         ReadyLoginScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
-                            underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                            underTopTextFormFont: .title2, authService: authService, showLogo: false // Передаём нужный шрифт
                         )
                         .frame(width: geometry.size.width)
                         Spacer()
@@ -43,7 +44,7 @@ struct IPadScreenView: View {
                         ReadyLoginScreenView(
                             viewModel: viewModel,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
-                            underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
+                            underTopTextFormFont: .title2, authService: authService, showLogo: false // Передаём нужный шрифт
                         )
                         .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
                     }

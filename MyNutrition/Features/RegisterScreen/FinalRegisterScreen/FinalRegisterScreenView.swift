@@ -11,11 +11,12 @@ struct FinalRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @ObservedObject var viewModel: BaseAuthViewModel
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var authService: AuthService
     var body: some View {
         if sizeClass == .compact {
-            IPhoneRegisterScreenView(viewModel: viewModel)
+            IPhoneRegisterScreenView(authService: authService, viewModel: viewModel)
         } else if sizeClass == .regular {
-            IPadRegisterScreenView(viewModel: viewModel)
+            IPadRegisterScreenView(authService: authService, viewModel: viewModel)
         }
     }
 }

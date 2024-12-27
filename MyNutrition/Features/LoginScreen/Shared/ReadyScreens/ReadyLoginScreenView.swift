@@ -11,6 +11,7 @@ struct ReadyLoginScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
     var topTextFont: Font
     var underTopTextFormFont: Font
+    @ObservedObject var authService: AuthService
     @EnvironmentObject var appState: AppState
     @State private var showRegisterScreen = false
     var showLogo: Bool
@@ -81,7 +82,7 @@ struct ReadyLoginScreenView: View {
                     }
                     .getCustomButtonStyle(width: 300, height: 40, textColor: .text, backGroundColor: .textField, cornerRadius: 10)
                     .sheet(isPresented: $appState.showRegisterScreen) {
-                        FinalRegisterScreenView(viewModel: viewModel)
+                        FinalRegisterScreenView(viewModel: viewModel, authService: authService)
                             .environmentObject(appState)
                     }
                     Button {

@@ -26,17 +26,12 @@ class FirestoreService {
         var lastLoginAt: Date? // Последний вход
     }
     // Создание или обновление пользователя
-    func createOrUpdateUser(user: User, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard !user.id.isEmpty else {
-            completion(.failure(NSError(domain: "FirestoreService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid UID"])))
-            return
-        }
+    func createOrUpdateUserAsync(user: User) async throws {
+        let userRef = db.collection("users").document(user.id)
         do {
-            try db.collection("users").document(user.id).setData(from: user, merge: true)
-            completion(.success(()))
+            try userRef.setData(from: user, merge: true)
         } catch {
-            print("Error creating/updating user: \(error.localizedDescription)")
-            completion(.failure(error))
+            throw NSError(domain: "FirestoreService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to create or update user: \(error.localizedDescription)"])
         }
     }
 

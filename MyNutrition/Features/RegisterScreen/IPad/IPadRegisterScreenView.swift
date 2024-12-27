@@ -9,6 +9,7 @@ import SwiftUI
 
 struct IPadRegisterScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
+    @ObservedObject var authService: AuthService
         @ObservedObject var viewModel: BaseAuthViewModel
     var body: some View {
         GeometryReader { geometry in
@@ -24,7 +25,7 @@ struct IPadRegisterScreenView: View {
 //                            .edgesIgnoringSafeArea(.top)
 //                            .accessibilityIdentifier("compactScreen")
                         ReadyRegisterScreenView(
-                            viewModel: viewModel,
+                            viewModel: viewModel, authService: authService,
                             topTextFont: .largeTitle, // Передаём нужный шрифт
                             underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
                         )
@@ -41,7 +42,7 @@ struct IPadRegisterScreenView: View {
 //                                .ignoresSafeArea()
 //                                .accessibilityIdentifier("screenRegular")
                             ReadyRegisterScreenView(
-                                viewModel: viewModel,
+                                viewModel: viewModel, authService: authService,
                                 topTextFont: .largeTitle, // Передаём нужный шрифт
                                 underTopTextFormFont: .title2, showLogo: false // Передаём нужный шрифт
                             )
