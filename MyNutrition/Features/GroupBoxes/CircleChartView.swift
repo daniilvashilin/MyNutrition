@@ -11,13 +11,14 @@ import SwiftUI
 struct CircleChartView: View {
     var backgroundColorCircle: Color
     var secondBackgroundColorCircle: Color
-    var goal: CGFloat
-    var current: CGFloat
+    var goal: Double
+    var current: Double
     var width: CGFloat
     var height: CGFloat
     var subLabel: String
-    var resultValue: CGFloat
+    var resultValue: Double
     var lineWidth: CGFloat
+    var resultFont: CGFloat
     var body: some View {
         ZStack {
             Circle()
@@ -31,10 +32,9 @@ struct CircleChartView: View {
                 )
                 .rotationEffect(.degrees(-90))
                 .animation(.easeOut(duration: 1), value: current)
-            
             VStack {
                 Text("\(resultValue, format: .number.grouping(.automatic).precision(.fractionLength(0)))")
-                    .font(.largeTitle)
+                    .font(.custom("", fixedSize: resultFont))
                     .fontWeight(.bold)
                 Text(subLabel)
             }

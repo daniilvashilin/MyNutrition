@@ -12,13 +12,13 @@ struct FinalIphoneMainView: View {
                 ZStack {
                     if selectedTabIphone == .home {
                         TestHomePageView(viewModel: viewModel, authservice: authService)
-                            .border(.red)
+//                            .border(.red)
                     } else if selectedTabIphone == .charts {
                         ChartsTabView()
-                            .border(.red)
+//                            .border(.red)
                     } else {
                         RecipesTabView()
-                            .border(.red)
+//                            .border(.red)
                     }
                 }
                 .frame(width: geometry.size.width ,height: geometry.size.height * 0.85)

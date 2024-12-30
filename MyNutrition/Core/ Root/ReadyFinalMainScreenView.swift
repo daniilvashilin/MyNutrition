@@ -15,8 +15,10 @@ struct ReadyFinalMainScreenView: View {
     var body: some View {
         if sizeClass == .compact {
             FinalIphoneMainView(authService: _authService, viewModel: _viewModel)
+                .padding()
         } else {
             FinalIpadMainView()
+                .padding()
         }
     }
 }
