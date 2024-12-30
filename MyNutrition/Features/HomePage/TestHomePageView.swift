@@ -7,7 +7,7 @@ struct TestHomePageView: View {
     @EnvironmentObject var nutritionService: NutritionService
     var body: some View {
         VStack {
-            CaloriesGroupBoxView()
+            TestCaloriesGroupBoxView()
 //            if let data = nutritionService.nutritionData {
 //                Text("Calories Goal: \(data.caloriesGoal)")
 //                Text("Calories Consumed: \(data.current.caloriesConsumed)")
