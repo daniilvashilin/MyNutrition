@@ -16,7 +16,7 @@ final class AuthService: ObservableObject {
     static let shared = AuthService()
     
     func signInWithApple(credential: ASAuthorizationAppleIDCredential, completion: @escaping (Result<AuthDataResult, Error>) -> Void) {
-        // Генерация nonce
+        // Generate nonce
         let nonce = generateNonce()
         currentNonce = nonce
         
@@ -32,7 +32,7 @@ final class AuthService: ObservableObject {
             providerID: AuthProviderID.apple,
             idToken: tokenString,
             rawNonce: hashedNonce,
-            accessToken: nil // Если accessToken не требуется
+            accessToken: nil // If nonce not needed
         )
         
         Auth.auth().signIn(with: firebaseCredential) { authResult, error in
@@ -101,9 +101,7 @@ final class AuthService: ObservableObject {
         )
         try await FirestoreService.shared.createOrUpdateUserAsync(user: firestoreUser)
         
-        // Добавляем начальные данные в коллекцию `nutrition`
         let nutritionData: [String: Any] = [
-            // Текущие данные (сбрасываются ежедневно)
             "current": [
                 "caloriesConsumed": 0,
                 "proteinConsumed": 0,
@@ -116,10 +114,8 @@ final class AuthService: ObservableObject {
                 "steps": 0
             ],
             
-            // Исторические данные (изначально пустые)
             "history": [],
             
-            // Цели (изначально 0, пользователь должен их установить)
             "caloriesGoal": 0,
             "proteinGoal": 0,
             "fatGoal": 0,
@@ -128,8 +124,7 @@ final class AuthService: ObservableObject {
             "fiberGoal": 0,
             "weightGoal": 0,
             
-            // Дополнительные данные
-            "lastResetDate": "", // Сохраняем дату последнего сброса
+            "lastResetDate": "",
             "ownerId": user.uid
         ]
         let db = Firestore.firestore()
@@ -139,6 +134,10 @@ final class AuthService: ObservableObject {
     }
     // Other
     func signOut() throws {
+        guard Auth.auth().currentUser != nil else {
+            print("Пользователь не авторизован")
+            return
+        }
         try Auth.auth().signOut()
     }
     
@@ -151,7 +150,6 @@ final class AuthService: ObservableObject {
         let db = Firestore.firestore()
         
         do {
-            // Удаляем данные из Firestore
             try await db.collection("users").document(currentUser.uid).delete()
             print("Данные пользователя удалены из Firestore")
         } catch {
@@ -160,7 +158,6 @@ final class AuthService: ObservableObject {
         }
         
         do {
-            // Удаляем аккаунт из Authentication
             try await currentUser.delete()
             print("Пользователь удалён из Firebase Authentication")
         } catch {
@@ -170,16 +167,12 @@ final class AuthService: ObservableObject {
     
     func deleteRelatedData(for uid: String) async throws {
         let db = Firestore.firestore()
-        
-        // Пример удаления коллекции nutrition
         let nutritionRef = db.collection("nutrition").whereField("ownerId", isEqualTo: uid)
         
         let documents = try await nutritionRef.getDocuments()
         for document in documents.documents {
             try await document.reference.delete()
         }
-        
-        print("Связанные данные пользователя удалены")
     }
     
     func reauthenticateUser(email: String, password: String) async throws {
@@ -190,49 +183,7 @@ final class AuthService: ObservableObject {
         print("Пользователь успешно переавторизован")
     }
     
-    func resetDailyDataIfNeeded(uid: String) async throws {
-        let db = Firestore.firestore()
-        let nutritionRef = db.collection("nutrition").document(uid)
-
-        let today = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
-
-        let document = try await nutritionRef.getDocument()
-        if var data = document.data() {
-            let lastResetDate = data["lastResetDate"] as? String ?? ""
-
-            if today != lastResetDate {
-                var currentData = data["current"] as? [String: Any] ?? [:]
-                var history = data["history"] as? [[String: Any]] ?? []
-
-                currentData["date"] = today
-                history.append(currentData)
-
-                data["history"] = history
-                data["current"] = [
-                    "caloriesConsumed": 0,
-                    "proteinConsumed": 0,
-                    "fatConsumed": 0,
-                    "carbsConsumed": 0,
-                    "sugarConsumed": 0,
-                    "fiberConsumed": 0,
-                    "move": 0,
-                    "exerciseMinutes": 0,
-                    "steps": 0
-                ]
-                data["lastResetDate"] = today
-
-                try await nutritionRef.setData(data, merge: true)
-            }
-        }
-    }
     
-    func updateUserGoals(for uid: String, goals: [String: Any]) async throws {
-        let db = Firestore.firestore()
-        let nutritionRef = db.collection("nutrition").document(uid)
-
-        // Обновляем цели
-        try await nutritionRef.updateData(goals)
-    }
     
     func generateNonce(length: Int = 32) -> String {
         precondition(length > 0)
@@ -267,10 +218,46 @@ final class AuthService: ObservableObject {
         return result
     }
     
+    func resetDailyDataIfNeeded(uid: String) async throws {
+        let db = Firestore.firestore()
+        let nutritionRef = db.collection("nutrition").document(uid)
+        
+        let today = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+        
+        let document = try await nutritionRef.getDocument()
+        if var data = document.data() {
+            let lastResetDate = data["lastResetDate"] as? String ?? ""
+            
+            if today != lastResetDate {
+                var currentData = data["current"] as? [String: Any] ?? [:]
+                var history = data["history"] as? [[String: Any]] ?? []
+                
+                currentData["date"] = today
+                history.append(currentData)
+                
+                data["history"] = history
+                data["current"] = [
+                    "caloriesConsumed": 0,
+                    "proteinConsumed": 0,
+                    "fatConsumed": 0,
+                    "carbsConsumed": 0,
+                    "sugarConsumed": 0,
+                    "fiberConsumed": 0,
+                    "move": 0,
+                    "exerciseMinutes": 0,
+                    "steps": 0
+                ]
+                data["lastResetDate"] = today
+                
+                try await nutritionRef.setData(data, merge: true)
+            }
+        }
+    }
+    
     func updateCurrentNutrition(uid: String, updates: [String: Any]) async throws {
         let db = Firestore.firestore()
         let nutritionRef = db.collection("nutrition").document(uid)
-
+        
         for (key, value) in updates {
             guard let incrementValue = value as? Int else { continue }
             try await nutritionRef.updateData([

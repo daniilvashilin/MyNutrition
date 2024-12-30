@@ -26,8 +26,8 @@ struct IPadScreenView: View {
                             .accessibilityIdentifier("compactScreen")
                         ReadyLoginScreenView(
                             viewModel: viewModel,
-                            topTextFont: .largeTitle, // Передаём нужный шрифт
-                            underTopTextFormFont: .title2, authService: authService, showLogo: false // Передаём нужный шрифт
+                            topTextFont: .largeTitle,
+                            underTopTextFormFont: .title2, authService: authService, showLogo: false
                         )
                         .frame(width: geometry.size.width)
                         Spacer()
@@ -37,14 +37,14 @@ struct IPadScreenView: View {
                     HStack(spacing: 0) {
                         Image(.screenRegular)
                             .resizable()
-                               .scaledToFill()
-                               .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
-                               .ignoresSafeArea()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
+                            .ignoresSafeArea()
                             .accessibilityIdentifier("screenRegular")
                         ReadyLoginScreenView(
                             viewModel: viewModel,
-                            topTextFont: .largeTitle, // Передаём нужный шрифт
-                            underTopTextFormFont: .title2, authService: authService, showLogo: false // Передаём нужный шрифт
+                            topTextFont: .largeTitle,
+                            underTopTextFormFont: .title2, authService: authService, showLogo: false
                         )
                         .frame(width: geometry.size.width * 0.5, height: geometry.size.height)
                     }

@@ -1,10 +1,3 @@
-//
-//  CustomTextFiledVIew.swift
-//  MyNutrition
-//
-//  Created by Daniil on 17/12/2024.
-//
-
 import SwiftUI
 
 struct CustomTextFiledVIew: View {

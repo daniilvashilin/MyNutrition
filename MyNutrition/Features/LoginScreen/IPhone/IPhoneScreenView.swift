@@ -18,7 +18,7 @@ struct IPhoneScreenView: View {
                     .edgesIgnoringSafeArea(.all)
                     ReadyLoginScreenView(
                         viewModel: viewModel,
-                        topTextFont: .title2, // Передаём нужный шрифт
+                        topTextFont: .title2, 
                         underTopTextFormFont: .footnote, authService: authService, showLogo: true // Передаём нужный шрифт
                     )
                     .frame(width: geometry.size.width, height: geometry.size.height)

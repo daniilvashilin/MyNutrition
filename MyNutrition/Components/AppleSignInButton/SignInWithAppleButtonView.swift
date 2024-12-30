@@ -1,18 +1,8 @@
-//
-//  SignInWithAppleButtonView.swift
-//  MyNutrition
-//
-//  Created by Daniil on 26/12/2024.
-//
-
-import Foundation
 import SwiftUI
 import AuthenticationServices
 
-
 struct SignInWithAppleButtonView: View {
     let onCompletion: (Result<ASAuthorization, Error>) -> Void
-
     var body: some View {
         SignInWithAppleButton(
             .signIn,
@@ -28,8 +18,7 @@ struct SignInWithAppleButtonView: View {
                 }
             }
         )
-        .signInWithAppleButtonStyle(.black)
-        .frame(height: 40)
-        .padding()
+        .signInWithAppleButtonStyle(.whiteOutline) // Белый текст и белая обводка
+        .frame(width:  UIScreen.main.formWidth, height: 40)
     }
 }

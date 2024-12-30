@@ -1,9 +1,3 @@
-//
-//  UIExtensions.swift
-//  MyNutrition
-//
-//  Created by Daniil on 17/12/2024.
-//
 
 import Foundation
 import SwiftUICore
@@ -25,3 +19,9 @@ extension View {
 }
 
 
+
+extension UIScreen {
+    var formWidth: CGFloat {
+        bounds.width <= 375 ? 300 : 350
+    }
+}

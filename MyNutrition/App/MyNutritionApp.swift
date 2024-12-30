@@ -1,10 +1,3 @@
-//
-//  MyNutritionApp.swift
-//  MyNutrition
-//
-//  Created by Daniil on 17/12/2024.
-//
-
 import SwiftUI
 import Firebase
 import FirebaseAuth
@@ -25,8 +18,9 @@ class AppState: ObservableObject {
 struct MyNutritionApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var baseAuthViewModel = BaseAuthViewModel()
-    @StateObject private var appState = AppState() // Глобальное состояние приложения
+    @StateObject private var appState = AppState()
     @StateObject private var authService = AuthService()
+    @StateObject private var nutritionService = NutritionService()
     
     var body: some Scene {
         WindowGroup {
@@ -34,21 +28,29 @@ struct MyNutritionApp: App {
                 if baseAuthViewModel.isLoading {
                     LoadingScreenView()
                 } else if baseAuthViewModel.isAuthenticated {
-                    TestHomePageView(viewModel: baseAuthViewModel, authservice: authService)
-                        .onAppear {
-                            Task {
-                                if let user = Auth.auth().currentUser {
-                                    do {
-                                        try await authService.resetDailyDataIfNeeded(uid: user.uid)
-                                    } catch {
-                                        print("Ошибка при сбросе данных: \(error.localizedDescription)")
-                                    }
-                                }
-                            }
-                        }
+                    ReadyFinalMainScreenView()
+                        .environmentObject(nutritionService)
+                        .environmentObject(authService)
+                        .environmentObject(baseAuthViewModel)
                 } else {
-                    FinalLoginScreenView(authService: authService)
-                        .environmentObject(appState) // Передача состояния в приложение
+                    FinalLoginScreenView()
+                        .environmentObject(appState)
+                        .environmentObject(nutritionService)
+                        .environmentObject(authService)
+                        .environmentObject(baseAuthViewModel)
+                        .ignoresSafeArea(.keyboard, edges: .bottom)
+                }
+            }
+            .onAppear {
+                Task {
+                    do {
+                        if let user = Auth.auth().currentUser {
+                            try await authService.resetDailyDataIfNeeded(uid: user.uid)
+                            print("Сброс ежедневных данных завершён.")
+                        }
+                    } catch {
+                        print("Ошибка при сбросе данных: \(error.localizedDescription)")
+                    }
                 }
             }
         }

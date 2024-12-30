@@ -20,6 +20,12 @@ class BaseAuthViewModel: ObservableObject {
     @Published var successMessage: String?
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
+    private static let allowedDomains = [
+        "gmail.com", "icloud.com", "yahoo.com",
+        "outlook.com", "hotmail.com", "live.com",
+        "yandex.ru", "yandex.com", "mail.ru", "protonmail.com"
+    ]
+    
     init() {
         startAuthListener()
     }
@@ -38,22 +44,59 @@ class BaseAuthViewModel: ObservableObject {
         }
     }
     
-    // Delte the listener if not need
     deinit {
         if let handle = authStateListenerHandle {
             Auth.auth().removeStateDidChangeListener(handle)
             print("Listener removed in deinit")
         }
     }
+    
     func stopAuthListener() {
         if let handle = authStateListenerHandle {
             Auth.auth().removeStateDidChangeListener(handle)
             print("Listener removed manually")
-            authStateListenerHandle = nil  // Очищаем handle
+            authStateListenerHandle = nil
         }
     }
     
-    enum errorHandle: LocalizedError {
+    enum UnvalidEmailHandel: LocalizedError {
+           case missingAtSymbol
+           case missingDotSymbol
+           case notValidDomain
+           
+           var unvalidEmailHandelDescription: String {
+               switch self {
+               case .missingAtSymbol:
+                   return "Missing @ symbol"
+               case .missingDotSymbol:
+                   return "Missing . symbol"
+               case .notValidDomain:
+                   return "Use valid domain like 'gmail.com' and more..."
+               }
+           }
+       }
+       
+       func validateEmail(_ email: String) throws {
+           guard email.contains("@") else {
+               throw UnvalidEmailHandel.missingAtSymbol
+           }
+           
+           let components = email.split(separator: "@")
+           guard components.count == 2 else {
+               throw UnvalidEmailHandel.missingAtSymbol
+           }
+           
+           let domainPart = components[1]
+           guard domainPart.contains(".") else {
+               throw UnvalidEmailHandel.missingDotSymbol
+           }
+           
+           guard Self.allowedDomains.contains(String(domainPart)) else {
+               throw UnvalidEmailHandel.notValidDomain
+           }
+       }
+    
+    enum FirebaseError: LocalizedError {
         case invalidEmailOrPassword
         case emailAlreadyInUse
         case invalidEmail
@@ -61,47 +104,35 @@ class BaseAuthViewModel: ObservableObject {
         case weakPassword
         case userMismatch
         case unexpectedError
+        
         var errorDescription: String? {
             switch self {
-            case .invalidEmailOrPassword: return "Invalid email or password"
-            case .invalidEmail: return "Invalid email"
-            case .invalidPassword: return "Invalid password"
-            case .weakPassword: return "Weak password"
-            case .unexpectedError: return "Fatal error occurred"
+            case .invalidEmailOrPassword: return "Invalid email or password."
+            case .invalidEmail: return "Invalid email."
+            case .invalidPassword: return "Invalid password."
+            case .weakPassword: return "Password is too weak."
             case .emailAlreadyInUse: return "This email is already in use. Please try another."
-            case .userMismatch: return "User credentials do not match. Please check your email and password"
+            case .userMismatch: return "Email and password do not match."
+            case .unexpectedError: return "An unexpected error occurred."
             }
         }
     }
     
-    enum AuthSuccess {
-        case login
-        case registration
-        case logout
-        
-        var message: String {
-            switch self {
-            case .login: return "Successfully logged in."
-            case .registration: return "Account successfully created."
-            case .logout: return "Successfully logged out."
-            }
-        }
-    }
     private func handleFirebaseError(_ error: NSError) -> String {
         switch error.code {
         case AuthErrorCode.invalidEmail.rawValue:
-            return errorHandle.invalidEmail.errorDescription ?? "Invalid email"
+            return FirebaseError.invalidEmail.errorDescription ?? "Invalid email."
         case AuthErrorCode.weakPassword.rawValue:
-            return errorHandle.weakPassword.errorDescription ?? "Weak password"
+            return FirebaseError.weakPassword.errorDescription ?? "Weak password."
         case AuthErrorCode.wrongPassword.rawValue:
-            return errorHandle.invalidPassword.errorDescription ?? "Invalid password"
+            return FirebaseError.invalidPassword.errorDescription ?? "Invalid password."
         case AuthErrorCode.emailAlreadyInUse.rawValue:
-            return errorHandle.emailAlreadyInUse.errorDescription ?? "Email already in use"
+            return FirebaseError.emailAlreadyInUse.errorDescription ?? "Email already in use."
         case AuthErrorCode.userMismatch.rawValue:
-            return "User credentials do not match. Please check your email and password."
+            return FirebaseError.userMismatch.errorDescription ?? "User mismatch."
         default:
             print("Unhandled Firebase error: \(error.code)")
-            return errorHandle.unexpectedError.errorDescription ?? "Unexpected error"
+            return FirebaseError.unexpectedError.errorDescription ?? "Unexpected error."
         }
     }
     
@@ -115,14 +146,17 @@ class BaseAuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        defer {
-            isLoading = false  // Этот код гарантированно выполнится в конце
-        }
+        defer { isLoading = false }
+        
         do {
+            try validateEmail(email)
             let user = try await authService.createUserWithEmail(email: email, password: password)
             isAuthenticated = true
-            logSuccess("user: \(String(describing: user.email)) has been created with ID: \(user.uid)")
-            successMessage = AuthSuccess.registration.message
+            logSuccess("User \(user.email ?? "") has been created with ID: \(user.uid).")
+            successMessage = "Account successfully created."
+        } catch let error as UnvalidEmailHandel {
+            errorMessage = error.errorDescription
+            throw error
         } catch let error as NSError {
             errorMessage = handleFirebaseError(error)
             throw error
@@ -133,14 +167,15 @@ class BaseAuthViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        defer {
-            isLoading = false  // Этот код гарантированно выполнится в конце
-        }
+        defer { isLoading = false }
+        
         do {
+            try validateEmail(email)
             let user = try await authService.signInWithEmail(email: email, password: password)
-            //            isAuthenticated = true
-            print("user: \(String(describing: user.email)) has loged in with ID: \(user.uid)")
-            logSuccess("user: \(String(describing: user.email)) has been created with ID: \(user.uid)")
+            logSuccess("User \(user.email ?? "") has logged in with ID: \(user.uid).")
+        } catch let error as UnvalidEmailHandel {
+            errorMessage = error.errorDescription
+            throw error
         } catch let error as NSError {
             errorMessage = handleFirebaseError(error)
             throw error
@@ -153,10 +188,9 @@ class BaseAuthViewModel: ObservableObject {
             isAuthenticated = false
             email = ""
             password = ""
-            successMessage = AuthSuccess.logout.message
+            successMessage = "Successfully logged out."
         } catch let error as NSError {
             errorMessage = handleFirebaseError(error)
         }
     }
-    
 }

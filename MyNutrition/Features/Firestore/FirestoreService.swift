@@ -1,10 +1,3 @@
-//
-//  FirestoreService.swift
-//  MyNutrition
-//
-//  Created by Daniil on 26/12/2024.
-//
-
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
@@ -16,16 +9,15 @@ class FirestoreService {
     private let db = Firestore.firestore()
     
     struct User: Codable, Identifiable {
-        var id: String // uid из Firebase Authentication
-        var email: String? // Почта, если есть
-        var name: String? // Имя пользователя, если предоставлено
-        var photoURL: String? // Ссылка на аватар, если доступна
-        var providerId: String // Способ авторизации (например, "password", "apple.com")
-        var createdAt: Date // Дата регистрации
-        var isPremium: Bool // Дополнительное поле: премиум-статус
-        var lastLoginAt: Date? // Последний вход
+        var id: String
+        var email: String?
+        var name: String?
+        var photoURL: String?
+        var providerId: String
+        var createdAt: Date
+        var isPremium: Bool
+        var lastLoginAt: Date?
     }
-    // Создание или обновление пользователя
     func createOrUpdateUserAsync(user: User) async throws {
         let userRef = db.collection("users").document(user.id)
         do {
@@ -35,7 +27,6 @@ class FirestoreService {
         }
     }
 
-    // Получение данных пользователя
     func fetchUser(uid: String, completion: @escaping (Result<User, Error>) -> Void) {
         db.collection("users").document(uid).getDocument { snapshot, error in
             if let error = error {
@@ -48,7 +39,6 @@ class FirestoreService {
         }
     }
 
-    // Пример: Удаление пользователя
     func deleteUser(uid: String, completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("users").document(uid).delete { error in
             if let error = error {

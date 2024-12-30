@@ -16,8 +16,9 @@ struct IPhoneRegisterScreenView: View {
             ZStack {
                 Color.backGround
                     .edgesIgnoringSafeArea(.all)
-                ReadyRegisterScreenView(viewModel: viewModel, authService: authService, topTextFont: .title2, underTopTextFormFont: .footnote, showLogo: true)
+                ReadyRegisterScreenView(viewModel: viewModel, authService: authService, topTextFont: .title3, underTopTextFormFont: .footnote, showLogo: true)
                     .frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
         }
     }

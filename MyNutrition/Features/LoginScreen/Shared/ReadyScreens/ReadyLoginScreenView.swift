@@ -1,11 +1,5 @@
-//
-//  ReadyScreenView.swift
-//  MyNutrition
-//
-//  Created by Daniil on 17/12/2024.
-//
-
 import SwiftUI
+import AuthenticationServices
 
 struct ReadyLoginScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
@@ -14,6 +8,8 @@ struct ReadyLoginScreenView: View {
     @ObservedObject var authService: AuthService
     @EnvironmentObject var appState: AppState
     @State private var showRegisterScreen = false
+    @State private var isAuthenticated = false
+    @State private var signInError: String? = nil
     var showLogo: Bool
     
     var body: some View {
@@ -24,15 +20,14 @@ struct ReadyLoginScreenView: View {
                 
                 VStack(spacing: 15) {
                     Spacer()
+                    if showLogo {
+                        Image("LogoIcon")
+                            .resizable()
+                            .renderingMode(.template)
+                            .foregroundStyle(.text)
+                            .frame(width: 50, height: 50)
+                    }
                     
-                    // Логотип
-                    Image(showLogo ? "LogoIcon" : "NoImage")
-                        .resizable()
-                        .renderingMode(.template)
-                        .foregroundStyle(.text)
-                        .frame(width: 50, height: 50)
-                    
-                    // Заголовок и подзаголовок
                     Text("Welcome to MyNutrition")
                         .font(topTextFont)
                         .fontWeight(.medium)
@@ -45,7 +40,7 @@ struct ReadyLoginScreenView: View {
                     
                     // Поля ввода
                     CustomTextFiledVIew(
-                        width: 300,
+                        width: UIScreen.main.formWidth,
                         height: 45,
                         text: $viewModel.email,
                         viewModel: viewModel
@@ -53,7 +48,7 @@ struct ReadyLoginScreenView: View {
                     .padding(.bottom, 10)
                     
                     CustomSecurFieldView(
-                        width: 300,
+                        width: UIScreen.main.formWidth,
                         height: 45,
                         text: $viewModel.password,
                         viewModel: viewModel
@@ -62,48 +57,64 @@ struct ReadyLoginScreenView: View {
                     
                     // Кнопки
                     Button {
-                        print("Sign in tapped")
                         Task {
                             do {
                                 try await viewModel.signInWithEmail()
                             } catch {
-                                print("Login failed: \(String(describing: viewModel.errorMessage))")
+                                signInError = viewModel.errorMessage
+                                print("Login failed: \(String(describing: signInError))")
                             }
                         }
                     } label: {
                         Text("Sign in")
                     }
-                    .getCustomButtonStyle(width: 300, height: 45, textColor: .secondText, backGroundColor: .text, cornerRadius: 15)
-                    
-                    Button(action: {
+                    .getCustomButtonStyle(width: UIScreen.main.formWidth, height: 45, textColor: .white, backGroundColor: .black, cornerRadius: 10)
+                    Button {
                         appState.showRegisterScreen = true
-                    }) {
+                    } label: {
                         Text("Register")
                     }
-                    .getCustomButtonStyle(width: 300, height: 40, textColor: .text, backGroundColor: .textField, cornerRadius: 10)
-                    .sheet(isPresented: $appState.showRegisterScreen) {
+                    .getCustomButtonStyle(width: UIScreen.main.formWidth, height: 40, textColor: .text, backGroundColor: .textField, cornerRadius: 10)
+                    .fullScreenCover(isPresented: $appState.showRegisterScreen) {
                         FinalRegisterScreenView(viewModel: viewModel, authService: authService)
                             .environmentObject(appState)
                     }
-                    Button {
-                        print("Sign in with Apple")
-                    } label: {
-                        HStack {
-                            Image(systemName: "apple.logo")
-                                .font(.headline)
-                            Text("Sign in with Apple")
+                    
+                    // "Sign in with Apple"
+                    VStack(spacing: 5) {
+                        SignInWithAppleButtonView { result in
+                            switch result {
+                            case .success(let authorization):
+                                if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                                    AuthService.shared.signInWithApple(credential: appleIDCredential) { result in
+                                        switch result {
+                                        case .success(let authResult):
+                                            print("Пользователь авторизован: \(authResult.user.uid)")
+                                            DispatchQueue.main.async {
+                                                isAuthenticated = true
+                                            }
+                                        case .failure(_):
+                                            signInError = "Apple Sign in not working"
+                                        }
+                                    }
+                                } else {
+                                    signInError = "Apple Sign in not working"
+                                }
+                            case .failure(_):
+                                signInError = "Apple Sign in not working"
+                            }
+                        }
+                        if let error = signInError {
+                            Text(error)
+                                .foregroundColor(.red)
+                                .font(.footnote)
+                                .multilineTextAlignment(.center)
                         }
                     }
-                    .getCustomButtonStyle(width: 300, height: 40, textColor: .text, backGroundColor: .backGround, cornerRadius: 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.text, lineWidth: 2)
-                    )
                     
                     Spacer()
                     
-                    // Текст помощи
-                    Text("Need help ? visit support page 􀬂")
+                    Text("Need help? Visit support page 􀬂")
                         .foregroundStyle(.subText)
                         .font(.footnote)
                 }
