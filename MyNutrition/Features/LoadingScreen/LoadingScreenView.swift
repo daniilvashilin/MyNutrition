@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct LoadingScreenView: View {
+    @State private var stepCount: Double = 0.0
+    @State private var errorMessage: String?
+    
     var body: some View {
         VStack {
             Text("Loading Screen View!")
@@ -17,8 +20,4 @@ struct LoadingScreenView: View {
                 .foregroundStyle(.gray)
         }
     }
-}
-
-#Preview {
-    LoadingScreenView()
 }

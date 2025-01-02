@@ -1,13 +1,14 @@
 import SwiftUI
 
-
 struct IPadSplitView: View {
-    @State var selectedTab: NavigationTabModel.TableViewSection = .home
+    @State private var selectedTab: NavigationTabModel.TableViewSection = .home
     let viewModel: BaseAuthViewModel
     let authService: AuthService
     let nutritionService: NutritionService
+
     var body: some View {
         NavigationSplitView {
+            // Левый список (Master)
             List(NavigationTabModel.TableViewSection.allCases, id: \.self) { tab in
                 Button {
                     selectedTab = tab
@@ -24,12 +25,17 @@ struct IPadSplitView: View {
                     .scaleEffect(selectedTab == tab ? 1.1 : 1)
                     .animation(.spring(), value: selectedTab == tab) // Анимация
                 }
+                .buttonStyle(.plain)
             }
+            .listStyle(SidebarListStyle())
+            .frame(minWidth: 240, idealWidth: 300, maxWidth: 320)
         } detail: {
+            // Детальная часть
             navigationTabs(for: selectedTab)
         }
+        .navigationSplitViewStyle(.balanced) // Сбалансированный стиль
     }
-    
+
     @ViewBuilder
     private func navigationTabs(for option: NavigationTabModel.TableViewSection) -> some View {
         switch option {
@@ -39,24 +45,38 @@ struct IPadSplitView: View {
                 authservice: authService
             )
             .environmentObject(nutritionService)
+            .navigationTitle("") // Убираем лишний заголовок
+            .toolbar {
+                // Убираем ToolBar, если он лишний
+            }
         case .charts:
             ChartsTabView()
+                .navigationTitle("") // Убираем заголовок
         case .recepices:
             RecipesTabView()
+                .navigationTitle("") // Убираем заголовок
         }
     }
 }
 
 struct ChartsTabView: View {
     var body: some View {
-        Text("Charts Tab")
-            .frame(width: 400, height: 400)
+        VStack {
+            Text("Charts Tab")
+                .font(.largeTitle)
+            Spacer()
+        }
+        .padding()
     }
 }
 
 struct RecipesTabView: View {
     var body: some View {
-        Text("Recipes Tab")
-            .frame(width: 400, height: 400)
+        VStack {
+            Text("Recipes Tab")
+                .font(.largeTitle)
+            Spacer()
+        }
+        .padding()
     }
 }

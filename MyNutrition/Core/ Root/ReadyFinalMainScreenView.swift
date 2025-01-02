@@ -13,12 +13,16 @@ struct ReadyFinalMainScreenView: View {
     @EnvironmentObject var viewModel: BaseAuthViewModel
     @Environment(\.horizontalSizeClass) var sizeClass
     var body: some View {
-        if sizeClass == .compact {
-            FinalIphoneMainView(authService: _authService, viewModel: _viewModel)
-                .padding()
-        } else {
-            FinalIpadMainView()
-                .padding()
+        ZStack {
+            Color.backGround
+                .edgesIgnoringSafeArea(.all)
+            if sizeClass == .compact {
+                FinalIphoneMainView(authService: _authService, viewModel: _viewModel)
+                    .padding()
+            } else {
+                FinalIpadMainView()
+                    .padding()
+            }
         }
     }
 }
