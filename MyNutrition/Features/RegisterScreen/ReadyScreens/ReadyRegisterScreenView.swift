@@ -94,27 +94,39 @@ struct ReadyRegisterScreenView: View {
             .getCustomButtonStyle(width: UIScreen.main.formWidth, height: 40, textColor: .text, backGroundColor: .textField, cornerRadius: 10)
             
             // Sign In with Apple
-            SignInWithAppleButtonView { result in
-                switch result {
-                case .success(let authorization):
-                    if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-                        AuthService.shared.signInWithApple(credential: appleIDCredential) { result in
-                            switch result {
-                            case .success:
-                                DispatchQueue.main.async {
-                                    isAuthenticated = true
-                                }
-                            case .failure:
-                                signInError = "Apple Sign in not working"
-                            }
-                        }
-                    } else {
-                        signInError = "Apple Sign in not working"
-                    }
-                case .failure:
-                    signInError = "Apple Sign in not working"
-                }
-            }
+//            SignInWithAppleButton(
+//                .signIn,
+//                onRequest: { request in
+//                    let nonce = authService.generateNonce()
+//                           authService.currentNonce = nonce
+//                           request.requestedScopes = [.fullName, .email]
+//                           request.nonce = nonce
+//                           
+//                           print("Generated nonce in onRequest: \(nonce)")
+//                },
+//                onCompletion: { result in
+//                    switch result {
+//                    case .success(let authorization):
+//                        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+//                            authService.signInWithApple(credential: appleIDCredential) { result in
+//                                switch result {
+//                                case .success(let authResult):
+//                                    print("Пользователь авторизован: \(authResult.user.uid)")
+//                                    DispatchQueue.main.async {
+//                                        isAuthenticated = true
+//                                    }
+//                                case .failure(let error):
+//                                    signInError = "Ошибка авторизации: \(error.localizedDescription)"
+//                                }
+//                            }
+//                        } else {
+//                            signInError = "Ошибка получения данных Apple ID"
+//                        }
+//                    case .failure(let error):
+//                        signInError = "Авторизация не удалась: \(error.localizedDescription)"
+//                    }
+//                }
+//            )
             
             if let error = signInError {
                 Text(error)

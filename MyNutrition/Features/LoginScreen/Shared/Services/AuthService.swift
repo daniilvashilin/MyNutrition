@@ -12,37 +12,97 @@ import CryptoKit
 import FirebaseFirestore
 
 final class AuthService: ObservableObject {
-    private var currentNonce: String?
+    var currentNonce: String?
     static let shared = AuthService()
     
     func signInWithApple(credential: ASAuthorizationAppleIDCredential, completion: @escaping (Result<AuthDataResult, Error>) -> Void) {
-        // Generate nonce
-        let nonce = generateNonce()
-        currentNonce = nonce
-        
         guard let identityToken = credential.identityToken,
-              let tokenString = String(data: identityToken, encoding: .utf8) else {
-            completion(.failure(NSError(domain: "SignInWithApple", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Token"])))
+              let tokenString = String(data: identityToken, encoding: .utf8),
+              let currentNonce = self.currentNonce else {
+            completion(.failure(NSError(domain: "SignInWithApple", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid Token or Nonce"])))
             return
         }
         
-        let hashedNonce = sha256(nonce)
-        
         let firebaseCredential = OAuthProvider.credential(
-            providerID: AuthProviderID.apple,
+            providerID: AuthProviderID.apple, // Используем предопределенную константу
             idToken: tokenString,
-            rawNonce: hashedNonce,
-            accessToken: nil // If nonce not needed
+            rawNonce: currentNonce
         )
-        
+
         Auth.auth().signIn(with: firebaseCredential) { authResult, error in
             if let error = error {
                 completion(.failure(error))
-            } else if let authResult = authResult {
-                completion(.success(authResult))
+                return
             }
+            guard let authResult = authResult else {
+                completion(.failure(NSError(domain: "SignInWithApple", code: -1, userInfo: [NSLocalizedDescriptionKey: "Auth Result is nil"])))
+                return
+            }
+            completion(.success(authResult))
         }
     }
+    
+    func decodeIDToken(token: String) -> [String: Any]? {
+        let segments = token.split(separator: ".")
+        guard segments.count == 3 else {
+            print("Invalid ID Token")
+            return nil
+        }
+        
+        let payloadSegment = String(segments[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+            .padding(toLength: ((segments[1].count + 3) / 4) * 4, withPad: "=", startingAt: 0)
+        
+        guard let payloadData = Data(base64Encoded: payloadSegment) else {
+            print("Failed to decode base64 payload")
+            return nil
+        }
+        
+        do {
+            let json = try JSONSerialization.jsonObject(with: payloadData, options: [])
+            return json as? [String: Any]
+        } catch {
+            print("Failed to decode JSON: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    func decodeAndValidateIDToken(_ token: String) {
+        let segments = token.split(separator: ".")
+        guard segments.count == 3 else {
+            print("Invalid ID Token format")
+            return
+        }
+        
+        // Decode payload
+        if let payloadData = Data(base64Encoded: String(segments[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")),
+           let payload = try? JSONSerialization.jsonObject(with: payloadData, options: []) as? [String: Any] {
+            
+            print("Decoded ID Token Payload: \(payload)")
+            
+            // Проверка nonce
+            if let tokenNonce = payload["nonce"] as? String {
+                print("Nonce in ID Token: \(tokenNonce)")
+                
+                let hashedNonce = sha256(currentNonce ?? "")
+                print("Hashed nonce: \(hashedNonce)")
+                
+                if tokenNonce == hashedNonce {
+                    print("Nonce matches!")
+                } else {
+                    print("Nonce mismatch. Expected: \(hashedNonce), got: \(tokenNonce)")
+                }
+            } else {
+                print("Nonce not found in token")
+            }
+        } else {
+            print("Failed to decode ID Token")
+        }
+    }
+    
     struct AuthDataResultModel {
         let uid: String
         let email: String?
@@ -266,30 +326,29 @@ final class AuthService: ObservableObject {
         }
     }
     
-    
     func sha256(_ input: String) -> String {
         let inputData = Data(input.utf8)
         let hashedData = SHA256.hash(data: inputData)
         return hashedData.compactMap { String(format: "%02x", $0) }.joined()
     }
+    
 }
-
-
-extension AuthService {
-    func addUserToFirestore(user: User) async throws {
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(user.uid)
-        
-        // Подготовка данных для Firestore
-        let userData: [String: Any] = [
-            "uid": user.uid,
-            "email": user.email ?? "",
-            "name": "No Name",
-            "createdAt": FieldValue.serverTimestamp(),
-            "isPremium": false,
-        ]
-        
-        // Добавление данных в Firestore
-        try await userRef.setData(userData, merge: true)
+    
+    extension AuthService {
+        func addUserToFirestore(user: User) async throws {
+            let db = Firestore.firestore()
+            let userRef = db.collection("users").document(user.uid)
+            
+            // Подготовка данных для Firestore
+            let userData: [String: Any] = [
+                "uid": user.uid,
+                "email": user.email ?? "",
+                "name": "No Name",
+                "createdAt": FieldValue.serverTimestamp(),
+                "isPremium": false,
+            ]
+            
+            // Добавление данных в Firestore
+            try await userRef.setData(userData, merge: true)
+        }
     }
-}

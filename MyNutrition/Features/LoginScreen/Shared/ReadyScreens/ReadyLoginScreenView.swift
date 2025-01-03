@@ -82,28 +82,36 @@ struct ReadyLoginScreenView: View {
                     
                     // "Sign in with Apple"
                     VStack(spacing: 5) {
-                        SignInWithAppleButtonView { result in
-                            switch result {
-                            case .success(let authorization):
-                                if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-                                    AuthService.shared.signInWithApple(credential: appleIDCredential) { result in
-                                        switch result {
-                                        case .success(let authResult):
-                                            print("Пользователь авторизован: \(authResult.user.uid)")
-                                            DispatchQueue.main.async {
-                                                isAuthenticated = true
+                        SignInWithAppleButton(
+                            .signIn,
+                            onRequest: { request in
+                                let nonce = authService.generateNonce() // Генерация nonce
+                                authService.currentNonce = nonce       // Сохранение для проверки
+                                request.nonce = authService.sha256(nonce) // Передача хэша nonce
+                                request.requestedScopes = [.fullName, .email]
+                            },
+                            onCompletion: { result in
+                                switch result {
+                                case .success(let authorization):
+                                    if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                                        authService.signInWithApple(credential: appleIDCredential) { result in
+                                            switch result {
+                                            case .success(let authResult):
+                                                print("Пользователь авторизован: \(authResult.user.uid)")
+                                            case .failure(let error):
+                                                print("Ошибка авторизации: \(error.localizedDescription)")
                                             }
-                                        case .failure(_):
-                                            signInError = "Apple Sign in not working"
                                         }
+                                    } else {
+                                        print("Ошибка: не удалось получить AppleIDCredential")
                                     }
-                                } else {
-                                    signInError = "Apple Sign in not working"
+                                case .failure(let error):
+                                    print("Ошибка авторизации: \(error.localizedDescription)")
                                 }
-                            case .failure(_):
-                                signInError = "Apple Sign in not working"
                             }
-                        }
+                        )
+                        .frame(width: 280, height: 45) // Задаём размер кнопки
+                        .signInWithAppleButtonStyle(.black) // Задаём стиль кнопки
                         if let error = signInError {
                             Text(error)
                                 .foregroundColor(.red)
