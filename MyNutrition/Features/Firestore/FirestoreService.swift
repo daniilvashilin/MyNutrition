@@ -17,7 +17,13 @@ class FirestoreService {
         var createdAt: Date
         var isPremium: Bool
         var lastLoginAt: Date?
+        var termsAccepted: Bool
+        var privacyPolicyAccepted: Bool
+        var healthDataAccessGranted: Bool
+        var locationAccessGranted: Bool
+        var analyticsOptIn: Bool
     }
+    
     func createOrUpdateUserAsync(user: User) async throws {
         let userRef = db.collection("users").document(user.id)
         do {

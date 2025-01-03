@@ -22,6 +22,14 @@ struct TestHomePageView: View {
                         )
                         .frame(maxWidth: .infinity) // Задаем максимальную ширину
                         IPhoneMacrosBoardView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.2)
+                        
+                        Button {
+                            Task {
+                               try authservice.signOut()
+                            }
+                        } label: {
+                            Text("Signout")
+                        }
                     } else if UIDevice.current.userInterfaceIdiom == .pad {
                         if verticalSizeClass == .regular {
                             Text("iPad Portrait")

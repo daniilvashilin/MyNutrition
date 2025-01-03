@@ -50,38 +50,40 @@ final class NutritionService: ObservableObject {
         
         let nutrition = Nutrition(
             id: userID,
-            caloriesGoal: data["caloriesGoal"] as? Int ?? 0,
-            proteinGoal: data["proteinGoal"] as? Int ?? 0,
-            fatGoal: data["fatGoal"] as? Int ?? 0,
-            carbsGoal: data["carbsGoal"] as? Int ?? 0,
-            sugarGoal: data["sugarGoal"] as? Int ?? 0,
-            fiberGoal: data["fiberGoal"] as? Int ?? 0,
-            weightGoal: data["weightGoal"] as? Int ?? 0,
+            caloriesGoal: data["caloriesGoal"] as? Double ?? 0,
+            proteinGoal: data["proteinGoal"] as? Double ?? 0,
+            fatGoal: data["fatGoal"] as? Double ?? 0,
+            carbsGoal: data["carbsGoal"] as? Double ?? 0,
+            sugarGoal: data["sugarGoal"] as? Double ?? 0,
+            fiberGoal: data["fiberGoal"] as? Double ?? 0,
+            weightGoal: data["weightGoal"] as? Double ?? 0,
             current: Nutrition.CurrentNutrition(
-                caloriesConsumed: currentData["caloriesConsumed"] ?? 0,
-                proteinConsumed: currentData["proteinConsumed"] ?? 0,
-                fatConsumed: currentData["fatConsumed"] ?? 0,
-                carbsConsumed: currentData["carbsConsumed"] ?? 0,
-                sugarConsumed: currentData["sugarConsumed"] ?? 0,
-                fiberConsumed: currentData["fiberConsumed"] ?? 0,
-                move: currentData["move"] ?? 0,
-                exerciseMinutes: currentData["exerciseMinutes"] ?? 0,
-                steps: currentData["steps"] ?? 0
+                caloriesConsumed: Double(currentData["caloriesConsumed"] ?? 0),
+                proteinConsumed: Double(currentData["proteinConsumed"] ?? 0),
+                fatConsumed: Double(currentData["fatConsumed"] ?? 0),
+                carbsConsumed: Double(currentData["carbsConsumed"] ?? 0),
+                sugarConsumed: Double(currentData["sugarConsumed"] ?? 0),
+                fiberConsumed: Double(currentData["fiberConsumed"] ?? 0),
+                move: Double(currentData["move"] ?? 0),
+                exerciseMinutes: Double(currentData["exerciseMinutes"] ?? 0),
+                steps: Double(currentData["steps"] ?? 0)
             ),
             history: historyData.compactMap { entry in
                 guard let dateString = entry["date"] as? String,
-                      let date = DateFormatter().date(from: dateString) else { return nil }
+                      let date = DateFormatter().date(from: dateString) else {
+                    return nil
+                }
                 return Nutrition.DailyNutrition(
                     date: date,
-                    caloriesConsumed: entry["caloriesConsumed"] as? Int ?? 0,
-                    proteinConsumed: entry["proteinConsumed"] as? Int ?? 0,
-                    fatConsumed: entry["fatConsumed"] as? Int ?? 0,
-                    carbsConsumed: entry["carbsConsumed"] as? Int ?? 0,
-                    sugarConsumed: entry["sugarConsumed"] as? Int ?? 0,
-                    fiberConsumed: entry["fiberConsumed"] as? Int ?? 0,
-                    move: entry["move"] as? Int ?? 0,
-                    exerciseMinutes: entry["exerciseMinutes"] as? Int ?? 0,
-                    steps: entry["steps"] as? Int ?? 0
+                    caloriesConsumed: entry["caloriesConsumed"] as? Double ?? 0,
+                    proteinConsumed: entry["proteinConsumed"] as? Double ?? 0,
+                    fatConsumed: entry["fatConsumed"] as? Double ?? 0,
+                    carbsConsumed: entry["carbsConsumed"] as? Double ?? 0,
+                    sugarConsumed: entry["sugarConsumed"] as? Double ?? 0,
+                    fiberConsumed: entry["fiberConsumed"] as? Double ?? 0,
+                    move: entry["move"] as? Double ?? 0,
+                    exerciseMinutes: entry["exerciseMinutes"] as? Double ?? 0,
+                    steps: entry["steps"] as? Double ?? 0
                 )
             },
             lastResetDate: Date()

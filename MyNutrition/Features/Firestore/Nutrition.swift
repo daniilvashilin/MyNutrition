@@ -2,39 +2,39 @@ import Foundation
 
 struct Nutrition: Identifiable {
     var id: String // userID (or documentID)
-    var caloriesGoal: Int
-    var proteinGoal: Int
-    var fatGoal: Int
-    var carbsGoal: Int
-    var sugarGoal: Int
-    var fiberGoal: Int
-    var weightGoal: Int
+    var caloriesGoal: Double
+    var proteinGoal: Double
+    var fatGoal: Double
+    var carbsGoal: Double
+    var sugarGoal: Double
+    var fiberGoal: Double
+    var weightGoal: Double
     var current: CurrentNutrition
     var history: [DailyNutrition]
     var lastResetDate: Date
 
     struct CurrentNutrition {
-        var caloriesConsumed: Int
-        var proteinConsumed: Int
-        var fatConsumed: Int
-        var carbsConsumed: Int
-        var sugarConsumed: Int
-        var fiberConsumed: Int
-        var move: Int
-        var exerciseMinutes: Int
-        var steps: Int
+        var caloriesConsumed: Double
+        var proteinConsumed: Double
+        var fatConsumed: Double
+        var carbsConsumed: Double
+        var sugarConsumed: Double
+        var fiberConsumed: Double
+        var move: Double
+        var exerciseMinutes: Double
+        var steps: Double
     }
 
     struct DailyNutrition {
         var date: Date
-        var caloriesConsumed: Int
-        var proteinConsumed: Int
-        var fatConsumed: Int
-        var carbsConsumed: Int
-        var sugarConsumed: Int
-        var fiberConsumed: Int
-        var move: Int
-        var exerciseMinutes: Int
-        var steps: Int
+        var caloriesConsumed: Double
+        var proteinConsumed: Double
+        var fatConsumed: Double
+        var carbsConsumed: Double
+        var sugarConsumed: Double
+        var fiberConsumed: Double
+        var move: Double
+        var exerciseMinutes: Double
+        var steps: Double
     }
 }

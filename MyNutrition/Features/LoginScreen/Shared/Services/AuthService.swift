@@ -11,6 +11,7 @@ import AuthenticationServices
 import CryptoKit
 import FirebaseFirestore
 
+
 final class AuthService: ObservableObject {
     var currentNonce: String?
     static let shared = AuthService()
@@ -28,7 +29,7 @@ final class AuthService: ObservableObject {
             idToken: tokenString,
             rawNonce: currentNonce
         )
-
+        
         Auth.auth().signIn(with: firebaseCredential) { authResult, error in
             if let error = error {
                 completion(.failure(error))
@@ -38,6 +39,81 @@ final class AuthService: ObservableObject {
                 completion(.failure(NSError(domain: "SignInWithApple", code: -1, userInfo: [NSLocalizedDescriptionKey: "Auth Result is nil"])))
                 return
             }
+            
+            let user = authResult.user
+            
+            // Проверяем, существует ли пользователь в Firestore
+            let db = Firestore.firestore()
+            let userRef = db.collection("users").document(user.uid)
+            
+            userRef.getDocument { (document, error) in
+                if let error = error {
+                    print("Error getting user document: \(error.localizedDescription)")
+                    return
+                }
+                
+                if document?.exists == true {
+                    // Пользователь существует, возвращаем данные
+                    completion(.success(authResult))
+                } else {
+                    // Пользователь не существует, создаем новый документ
+                    let userData: [String: Any] = [
+                        "uid": user.uid,
+                        "email": user.email ?? "",
+                        "name": "No Name",
+                        "createdAt": FieldValue.serverTimestamp(),
+                        "lastLoginAt": FieldValue.serverTimestamp(),
+                        "isPremium": false,
+                        "termsAccepted": false,
+                        "privacyPolicyAccepted": false,
+                        "healthDataAccessGranted": false,
+                        "locationAccessGranted": false,
+                        "analyticsOptIn": false
+                    ]
+                    
+                    
+                    userRef.setData(userData) { error in
+                        if let error = error {
+                            print("Error creating new user: \(error.localizedDescription)")
+                            return
+                        }
+                    }
+                    
+                    let nutritionData: [String: Any] = [
+                        "caloriesGoal": 0,
+                        "proteinGoal": 0,
+                        "fatGoal": 0,
+                        "carbsGoal": 0,
+                        "sugarGoal": 0,
+                        "fiberGoal": 0,
+                        "weightGoal": 0,
+                        "current": [
+                            "caloriesConsumed": 0,
+                            "proteinConsumed": 0,
+                            "fatConsumed": 0,
+                            "carbsConsumed": 0,
+                            "sugarConsumed": 0,
+                            "fiberConsumed": 0,
+                            "move": 0,
+                            "exerciseMinutes": 0,
+                            "steps": 0
+                        ],
+                        "history": [],
+                        "lastResetDate": "",
+                        "ownerId": user.uid
+                    ]
+                    
+                    // Добавляем nutrition данные
+                    let nutritionRef = db.collection("nutrition").document(user.uid)
+                    nutritionRef.setData(nutritionData) { error in
+                        if let error = error {
+                            print("Error creating nutrition data: \(error.localizedDescription)")
+                            return
+                        }
+                    }
+                }
+            }
+            
             completion(.success(authResult))
         }
     }
@@ -150,15 +226,21 @@ final class AuthService: ObservableObject {
         
         // Создаём документ в коллекции `users`
         let firestoreUser = FirestoreService.User(
-            id: user.uid,
-            email: user.email,
-            name: "No Name",
-            photoURL: nil,
-            providerId: "password",
-            createdAt: Date(),
-            isPremium: false,
-            lastLoginAt: Date()
+            id: user.uid,  // уникальный идентификатор пользователя
+            email: user.email,  // email пользователя
+            name: "No Name",  // имя по умолчанию
+            photoURL: nil,  // фото пользователя (если есть)
+            providerId: "password",  // метод регистрации
+            createdAt: Date(),  // дата создания пользователя
+            isPremium: false,  // статус пользователя
+            lastLoginAt: Date(),  // дата последнего входа
+            termsAccepted: false,  // согласие с условиями
+            privacyPolicyAccepted: false,  // согласие с политикой конфиденциальности
+            healthDataAccessGranted: false,
+            locationAccessGranted: false,
+            analyticsOptIn: false
         )
+        
         try await FirestoreService.shared.createOrUpdateUserAsync(user: firestoreUser)
         
         let nutritionData: [String: Any] = [
@@ -173,9 +255,7 @@ final class AuthService: ObservableObject {
                 "exerciseMinutes": 0,
                 "steps": 0
             ],
-            
             "history": [],
-            
             "caloriesGoal": 0,
             "proteinGoal": 0,
             "fatGoal": 0,
@@ -183,10 +263,10 @@ final class AuthService: ObservableObject {
             "sugarGoal": 0,
             "fiberGoal": 0,
             "weightGoal": 0,
-            
             "lastResetDate": "",
-            "ownerId": user.uid
+            "ownerId": user.uid  // связанный uid
         ]
+        
         let db = Firestore.firestore()
         try await db.collection("nutrition").document(user.uid).setData(nutritionData)
         
@@ -333,22 +413,22 @@ final class AuthService: ObservableObject {
     }
     
 }
-    
-    extension AuthService {
-        func addUserToFirestore(user: User) async throws {
-            let db = Firestore.firestore()
-            let userRef = db.collection("users").document(user.uid)
-            
-            // Подготовка данных для Firestore
-            let userData: [String: Any] = [
-                "uid": user.uid,
-                "email": user.email ?? "",
-                "name": "No Name",
-                "createdAt": FieldValue.serverTimestamp(),
-                "isPremium": false,
-            ]
-            
-            // Добавление данных в Firestore
-            try await userRef.setData(userData, merge: true)
-        }
+
+extension AuthService {
+    func addUserToFirestore(user: User) async throws {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        // Подготовка данных для Firestore
+        let userData: [String: Any] = [
+            "uid": user.uid,
+            "email": user.email ?? "",
+            "name": "No Name",
+            "createdAt": FieldValue.serverTimestamp(),
+            "isPremium": false,
+        ]
+        
+        // Добавление данных в Firestore
+        try await userRef.setData(userData, merge: true)
     }
+}
