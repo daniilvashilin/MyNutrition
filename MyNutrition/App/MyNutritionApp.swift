@@ -21,6 +21,7 @@ struct MyNutritionApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var authService = AuthService()
     @StateObject private var nutritionService = NutritionService()
+    @StateObject private var healthKitManager = HealthKitManager()
     
     var body: some Scene {
         WindowGroup {
@@ -32,6 +33,7 @@ struct MyNutritionApp: App {
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
+                        .environmentObject(healthKitManager)
                 } else {
                     FinalLoginScreenView()
                         .environmentObject(appState)

@@ -33,9 +33,22 @@
 		A5EB9BBF2D1481230039D18B /* MyNutritionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyNutritionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A51C545A2D282FBE009A9D87 /* Exceptions for "MyNutrition" folder in "MyNutrition" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A5952ACA2D118A1D0080026D /* MyNutrition */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A5952ACD2D118A1D0080026D /* MyNutrition */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A51C545A2D282FBE009A9D87 /* Exceptions for "MyNutrition" folder in "MyNutrition" target */,
+			);
 			path = MyNutrition;
 			sourceTree = "<group>";
 		};
@@ -366,6 +379,7 @@
 				DEVELOPMENT_TEAM = JYTXN6A6WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyNutrition/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -403,6 +417,7 @@
 				DEVELOPMENT_TEAM = JYTXN6A6WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyNutrition/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

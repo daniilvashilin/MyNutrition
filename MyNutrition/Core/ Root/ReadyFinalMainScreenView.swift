@@ -11,6 +11,8 @@ struct ReadyFinalMainScreenView: View {
     @EnvironmentObject var nutritionService: NutritionService
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var viewModel: BaseAuthViewModel
+    @EnvironmentObject var healthKitManager: HealthKitManager
+    
     @Environment(\.horizontalSizeClass) var sizeClass
     var body: some View {
         ZStack {
@@ -24,9 +26,12 @@ struct ReadyFinalMainScreenView: View {
                     .padding()
             }
         }
+        .onAppear {
+            healthKitManager.requestHealthKitPermissions()
+            healthKitManager.fetchStepsData()
+            healthKitManager.fetchCaloriesBurnedData()
+            healthKitManager.resetDailyDataIfNeeded()
+        }
     }
 }
 
-#Preview {
-    ReadyFinalMainScreenView()
-}

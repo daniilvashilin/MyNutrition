@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct IPhoneMacrosBoardView: View {
-    @EnvironmentObject var healthKitManager: NutritionService
     @EnvironmentObject var nutritionService: NutritionService
     var width: CGFloat
     var height: CGFloat

@@ -12,7 +12,6 @@ struct TestHomePageView: View {
         ZStack {
             Color.backGround
                 .edgesIgnoringSafeArea(.all)
-            
             ScrollView {
                 VStack(spacing: 10) {
                     // Убираем GeometryReader из ScrollView, если он не нужен
@@ -23,24 +22,6 @@ struct TestHomePageView: View {
                         )
                         .frame(maxWidth: .infinity) // Задаем максимальную ширину
                         IPhoneMacrosBoardView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.2)
-                        
-                        Button {
-                            Task {
-                                try authservice.signOut()
-                            }
-                        } label: {
-                            Text("Signout")
-                        }
-                        
-                        Button {
-                            Task {
-                                try authservice.signOut()
-                            }
-                        } label: {
-                            Text("Signout")
-                        }
-
-
                     } else if UIDevice.current.userInterfaceIdiom == .pad {
                         if verticalSizeClass == .regular {
                             Text("iPad Portrait")
@@ -51,6 +32,9 @@ struct TestHomePageView: View {
                 }
                 .padding()
             }
+        }
+        .onAppear {
+//            healthKitManager.requestHealthDataAccess()
         }
     }
 }

@@ -1,9 +1,10 @@
 import SwiftUI
-
 struct IPhoneDashBoardGroupBoxView: View {
     var width: CGFloat
     var height: CGFloat
     @EnvironmentObject var nutritionService: NutritionService
+    @EnvironmentObject var healthKitManager: HealthKitManager
+    @State private var showingTip = false
     var body: some View {
         GroupBox {
             VStack(alignment: .leading, spacing: height * 0.13) {
@@ -11,9 +12,14 @@ struct IPhoneDashBoardGroupBoxView: View {
                     Text("Calories")
                         .font(.headline)
                     Spacer()
-                    Image(systemName: "questionmark.circle")
-                        .foregroundColor(.gray)
+                    Button {
+                        showingTip.toggle() // Показываем/скрываем подсказку
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundColor(.gray)
+                    }
                 }
+                
                 HStack {
                     if let data = nutritionService.nutritionData {
                         // График
@@ -31,9 +37,31 @@ struct IPhoneDashBoardGroupBoxView: View {
                     }
                     VStack(alignment: .leading, spacing: height * 0.05) {
                         if let data = nutritionService.nutritionData {
-                            CustomMetricsComponent(title: "Base Goal", subtitle: "\(data.caloriesGoal)", image: "flag.fill", width: width, imageColor: .text, metricType: "cal")
-                            CustomMetricsComponent(title: "Day Strike", subtitle: "2", image: "flame", width: width, imageColor: .orange, metricType: "days")
-                            CustomMetricsComponent(title: "Steps", subtitle: "2", image: "shoe.2", width: width, imageColor: .indigo, metricType: "steps")
+                            // Используем NumberFormatter для отображения данных с нужным форматом
+                            CustomMetricsComponent(
+                                title: "Base Goal",
+                                subtitle: NumberFormatter.calorieFormatter.string(from: NSNumber(value: data.caloriesGoal)) ?? "0",
+                                image: "flag.fill",
+                                width: width,
+                                imageColor: .text,
+                                metricType: "cal"
+                            )
+                            CustomMetricsComponent(
+                                title: "Burned",
+                                subtitle: NumberFormatter.calorieFormatter.string(from: NSNumber(value: healthKitManager.burnedCalories)) ?? "0",
+                                image: "flame",
+                                width: width,
+                                imageColor: .orange,
+                                metricType: "days"
+                            )
+                            CustomMetricsComponent(
+                                title: "Steps",
+                                subtitle: NumberFormatter.calorieFormatter.string(from: NSNumber(value: healthKitManager.stepsCount)) ?? "0",
+                                image: "shoe.2",
+                                width: width,
+                                imageColor: .indigo,
+                                metricType: "steps"
+                            )
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: height * 0.02, alignment: .center)
