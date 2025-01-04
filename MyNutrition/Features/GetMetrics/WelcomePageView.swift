@@ -8,26 +8,31 @@
 import SwiftUI
 
 struct WelcomePageView: View {
-    @State private var values = 1
+    @State private var skip = false
+    @EnvironmentObject var viewModel: BaseAuthViewModel
+    @EnvironmentObject var authservice: AuthService
     var body: some View {
-        TabView {
-            Tab("Celendar", image: "Celendar") {
-                VStack {
-                    SelectThemeView()
-                }
-            }
-            
-            Tab("Celendar", image: "Celendar") {
-                VStack {
-                    Text("New")
+        GeometryReader {geom in
+            NavigationStack {
+                ZStack {
+                    Color.backGround
+                        .ignoresSafeArea()
+                    VStack {
+                        Spacer()
+                        SelectThemeView()
+                        Spacer()
+                        ButtonsNextSkitView(widthButton: geom.size.width * 0.2,
+                                            heightButton: geom.size.height * 0.06,
+                                            fontSize: geom.size.width * 0.04, skipAccess: $skip, skipDestination: AnyView(TestViewSkip()), nextDestination: AnyView(IPhoneScreenView()), disabled: $skip)
+                    }
+                    .padding()
                 }
             }
         }
-        .tabViewStyle(.page)
     }
 }
 
-
-#Preview {
-    WelcomePageView()
-}
+//
+//#Preview {
+//    WelcomePageView()
+//}

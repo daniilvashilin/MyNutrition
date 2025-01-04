@@ -17,15 +17,16 @@ struct SelectThemeView: View {
                 Image(themeManager.isDarkMode ? .nightMode : .sunMode)
                     .renderingMode(.template)
                     .resizable()
-                    .frame(width: geom.size.width * 0.3, height: geom.size.height * 0.16)
+                    .frame(width: geom.size.width * 0.3, height: geom.size.height * 0.18)
                     .foregroundStyle(themeManager.isDarkMode ? gradientLightColor : gradientDarkColor)
                     .padding()
                 
                 VStack {
                     Text("Choose a color scheme")
                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+                        .font(.custom("", fixedSize: geom.size.width * 0.04))
                 }
-                .frame(width: geom.size.width * 0.5, height: geom.size.height * 0.2)
+                .frame(width: geom.size.width * 0.7, height: geom.size.height * 0.2)
                 
                 HStack {
                     Button {
@@ -34,7 +35,7 @@ struct SelectThemeView: View {
                         }
                     } label: {
                         Text("Light")
-                            .foregroundStyle(themeManager.isDarkMode == false  ? .black : .black)
+                            .foregroundStyle(themeManager.isDarkMode == false  ? .black : .white)
                     }
                     .frame(width: geom.size.width * 0.25, height: geom.size.height * 0.06)
                     .background(themeManager.isDarkMode == false ? .white : .clear)
@@ -60,11 +61,6 @@ struct SelectThemeView: View {
         }
     }
 }
-
-
-
-
-import SwiftUI
 
 class ThemeManager: ObservableObject {
     @Published var isDarkMode: Bool = true
