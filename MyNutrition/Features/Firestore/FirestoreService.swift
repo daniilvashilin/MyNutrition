@@ -22,6 +22,7 @@ class FirestoreService {
         var healthDataAccessGranted: Bool
         var locationAccessGranted: Bool
         var analyticsOptIn: Bool
+        var isFirstLogin: Bool
     }
     
     func createOrUpdateUserAsync(user: User) async throws {

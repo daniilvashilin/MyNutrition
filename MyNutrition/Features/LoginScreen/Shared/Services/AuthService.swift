@@ -68,7 +68,8 @@ final class AuthService: ObservableObject {
                         "privacyPolicyAccepted": false,
                         "healthDataAccessGranted": false,
                         "locationAccessGranted": false,
-                        "analyticsOptIn": false
+                        "analyticsOptIn": false,
+                        "isFirstLogin": true
                     ]
                     
                     
@@ -238,7 +239,8 @@ final class AuthService: ObservableObject {
             privacyPolicyAccepted: false,  // согласие с политикой конфиденциальности
             healthDataAccessGranted: false,
             locationAccessGranted: false,
-            analyticsOptIn: false
+            analyticsOptIn: false,
+            isFirstLogin: true
         )
         
         try await FirestoreService.shared.createOrUpdateUserAsync(user: firestoreUser)

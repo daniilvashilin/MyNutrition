@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFirestore
 
 @MainActor
 class BaseAuthViewModel: ObservableObject {
@@ -18,6 +19,7 @@ class BaseAuthViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var isAuthenticated: Bool = false
     @Published var successMessage: String?
+    @Published var isFirstLogin: Bool = true
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     
     private static let allowedDomains = [
@@ -51,6 +53,49 @@ class BaseAuthViewModel: ObservableObject {
         }
     }
     
+    // Переписал код, убрав try внутри выражения
+    func checkIfFirstLogin() async {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        let db = Firestore.firestore()
+        let docRef = db.collection("users").document(user.uid)
+        
+        do {
+            let document = try await docRef.getDocument()
+            if let data = document.data() {
+                self.isFirstLogin = data["isFirstLogin"] as? Bool ?? true
+                if self.isFirstLogin {
+                    await self.markFirstLoginCompleted()
+                }
+            }
+        } catch {
+            print("Error: \(error)")
+        }
+    }
+    
+    func markFirstLoginCompleted() async {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        do {
+            // Получаем данные пользователя
+            let document = try await userRef.getDocument()
+            if var data = document.data() {
+                let isFirstLogin = data["isFirstLogin"] as? Bool ?? true
+                if isFirstLogin {
+                    // Обновляем данные пользователя, если это его первый вход
+                    data["isFirstLogin"] = false
+                    // Обновляем только нужное поле
+                    try await userRef.setData(data, merge: true)
+                }
+            }
+        } catch {
+            print("Error in updating first login: \(error)")
+        }
+    }
+    
     func stopAuthListener() {
         if let handle = authStateListenerHandle {
             Auth.auth().removeStateDidChangeListener(handle)
@@ -60,41 +105,41 @@ class BaseAuthViewModel: ObservableObject {
     }
     
     enum UnvalidEmailHandel: LocalizedError {
-           case missingAtSymbol
-           case missingDotSymbol
-           case notValidDomain
-           
-           var unvalidEmailHandelDescription: String {
-               switch self {
-               case .missingAtSymbol:
-                   return "Missing @ symbol"
-               case .missingDotSymbol:
-                   return "Missing . symbol"
-               case .notValidDomain:
-                   return "Use valid domain like 'gmail.com' and more..."
-               }
-           }
-       }
-       
-       func validateEmail(_ email: String) throws {
-           guard email.contains("@") else {
-               throw UnvalidEmailHandel.missingAtSymbol
-           }
-           
-           let components = email.split(separator: "@")
-           guard components.count == 2 else {
-               throw UnvalidEmailHandel.missingAtSymbol
-           }
-           
-           let domainPart = components[1]
-           guard domainPart.contains(".") else {
-               throw UnvalidEmailHandel.missingDotSymbol
-           }
-           
-           guard Self.allowedDomains.contains(String(domainPart)) else {
-               throw UnvalidEmailHandel.notValidDomain
-           }
-       }
+        case missingAtSymbol
+        case missingDotSymbol
+        case notValidDomain
+        
+        var unvalidEmailHandelDescription: String {
+            switch self {
+            case .missingAtSymbol:
+                return "Missing @ symbol"
+            case .missingDotSymbol:
+                return "Missing . symbol"
+            case .notValidDomain:
+                return "Use valid domain like 'gmail.com' and more..."
+            }
+        }
+    }
+    
+    func validateEmail(_ email: String) throws {
+        guard email.contains("@") else {
+            throw UnvalidEmailHandel.missingAtSymbol
+        }
+        
+        let components = email.split(separator: "@")
+        guard components.count == 2 else {
+            throw UnvalidEmailHandel.missingAtSymbol
+        }
+        
+        let domainPart = components[1]
+        guard domainPart.contains(".") else {
+            throw UnvalidEmailHandel.missingDotSymbol
+        }
+        
+        guard Self.allowedDomains.contains(String(domainPart)) else {
+            throw UnvalidEmailHandel.notValidDomain
+        }
+    }
     
     enum FirebaseError: LocalizedError {
         case invalidEmailOrPassword

@@ -12,6 +12,7 @@ struct Nutrition: Identifiable {
     var current: CurrentNutrition
     var history: [DailyNutrition]
     var lastResetDate: Date
+//    var isFirstLogin: Bool
 
     struct CurrentNutrition {
         var caloriesConsumed: Double

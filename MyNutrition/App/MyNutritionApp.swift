@@ -22,27 +22,34 @@ struct MyNutritionApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var nutritionService = NutritionService()
     @StateObject private var healthKitManager = HealthKitManager()
-    
+    @StateObject private var themeManager = ThemeManager()
     var body: some Scene {
         WindowGroup {
             NavigationStack {
                 if baseAuthViewModel.isLoading {
                     LoadingScreenView()
+                        .environmentObject(themeManager)
+                } else if baseAuthViewModel.isFirstLogin {
+                    WelcomePageView()
+                        .environmentObject(themeManager)
                 } else if baseAuthViewModel.isAuthenticated {
                     ReadyFinalMainScreenView()
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
                         .environmentObject(healthKitManager)
+                        .environmentObject(themeManager)
                 } else {
                     FinalLoginScreenView()
                         .environmentObject(appState)
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
+                        .environmentObject(themeManager)
                         .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
             }
+            .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
             .onAppear {
                 Task {
                     do {
@@ -50,6 +57,7 @@ struct MyNutritionApp: App {
                             try await authService.resetDailyDataIfNeeded(uid: user.uid)
                             print("Сброс ежедневных данных завершён.")
                         }
+                        await baseAuthViewModel.checkIfFirstLogin()
                     } catch {
                         print("Ошибка при сбросе данных: \(error.localizedDescription)")
                     }
