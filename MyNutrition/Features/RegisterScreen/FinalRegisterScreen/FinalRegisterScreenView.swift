@@ -17,9 +17,11 @@ struct FinalRegisterScreenView: View {
         if sizeClass == .compact {
             IPhoneRegisterScreenView(authService: authService, viewModel: viewModel)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
+            autocorrectionDisabled()
         } else if sizeClass == .regular {
             IPadRegisterScreenView(authService: authService, viewModel: viewModel)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
+            autocorrectionDisabled() 
         }
     }
 }

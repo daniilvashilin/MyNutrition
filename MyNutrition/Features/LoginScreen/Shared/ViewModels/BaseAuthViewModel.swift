@@ -53,6 +53,14 @@ class BaseAuthViewModel: ObservableObject {
         }
     }
     
+//    func checkAuthenticationStatus() {
+//           if let user = Auth.auth().currentUser {
+//               isAuthenticated = true
+//           } else {
+//               isAuthenticated = false
+//           }
+//       }
+    
     // Переписал код, убрав try внутри выражения
     func checkIfFirstLogin() async {
         guard let user = Auth.auth().currentUser else { return }

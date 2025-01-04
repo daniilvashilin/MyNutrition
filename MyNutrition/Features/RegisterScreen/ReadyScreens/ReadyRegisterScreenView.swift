@@ -88,46 +88,13 @@ struct ReadyRegisterScreenView: View {
             
             Button {
                 appState.showRegisterScreen = false
+                viewModel.email = ""
+                viewModel.password = ""
+                viewModel.passwordConfirmation = ""
             } label: {
                 Text("Back to login")
             }
             .getCustomButtonStyle(width: UIScreen.main.formWidth, height: 40, textColor: .text, backGroundColor: .textField, cornerRadius: 10)
-            
-            // Sign In with Apple
-//            SignInWithAppleButton(
-//                .signIn,
-//                onRequest: { request in
-//                    let nonce = authService.generateNonce()
-//                           authService.currentNonce = nonce
-//                           request.requestedScopes = [.fullName, .email]
-//                           request.nonce = nonce
-//                           
-//                           print("Generated nonce in onRequest: \(nonce)")
-//                },
-//                onCompletion: { result in
-//                    switch result {
-//                    case .success(let authorization):
-//                        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-//                            authService.signInWithApple(credential: appleIDCredential) { result in
-//                                switch result {
-//                                case .success(let authResult):
-//                                    print("Пользователь авторизован: \(authResult.user.uid)")
-//                                    DispatchQueue.main.async {
-//                                        isAuthenticated = true
-//                                    }
-//                                case .failure(let error):
-//                                    signInError = "Ошибка авторизации: \(error.localizedDescription)"
-//                                }
-//                            }
-//                        } else {
-//                            signInError = "Ошибка получения данных Apple ID"
-//                        }
-//                    case .failure(let error):
-//                        signInError = "Авторизация не удалась: \(error.localizedDescription)"
-//                    }
-//                }
-//            )
-            
             if let error = signInError {
                 Text(error)
                     .foregroundColor(.red)

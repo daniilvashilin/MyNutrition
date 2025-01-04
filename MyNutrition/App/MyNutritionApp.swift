@@ -31,6 +31,10 @@ struct MyNutritionApp: App {
                         .environmentObject(themeManager)
                 } else if baseAuthViewModel.isFirstLogin {
                     WelcomePageView()
+                        .environmentObject(nutritionService)
+                        .environmentObject(authService)
+                        .environmentObject(baseAuthViewModel)
+                        .environmentObject(healthKitManager)
                         .environmentObject(themeManager)
                 } else if baseAuthViewModel.isAuthenticated {
                     ReadyFinalMainScreenView()
