@@ -15,9 +15,11 @@ struct FinalLoginScreenView: View {
           if sizeClass == .compact {
               IPhoneScreenView(viewModel: viewModel, authService: authService)
                   .ignoresSafeArea(.keyboard, edges: .bottom)
+              autocorrectionDisabled() 
           } else if sizeClass == .regular {
               IPadScreenView(viewModel: viewModel, authService: authService)
                   .ignoresSafeArea(.keyboard, edges: .bottom)
+              autocorrectionDisabled()
           }
       }
   }

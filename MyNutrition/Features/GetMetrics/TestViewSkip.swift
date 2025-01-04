@@ -10,12 +10,9 @@ import SwiftUI
 struct TestViewSkip: View {
     var body: some View {
             VStack {
-                Text("NExt view")
+                Text("Some")
         }
     }
 }
 
 
-#Preview {
-    TestViewSkip()
-}

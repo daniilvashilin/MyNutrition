@@ -12,12 +12,12 @@ struct SelectThemeView: View {
     var body: some View {
         let gradientDarkColor: Gradient = Gradient(colors: [.yellow, .orange])
         let gradientLightColor: Gradient = Gradient(colors: [.white, .blue])
-        GeometryReader {geom in
+        GeometryReader { geom in
             VStack {
                 Image(themeManager.isDarkMode ? .nightMode : .sunMode)
                     .renderingMode(.template)
                     .resizable()
-                    .frame(width: geom.size.width * 0.3, height: geom.size.height * 0.18)
+                    .frame(width: geom.size.width * 0.3, height: geom.size.height * 0.16)
                     .foregroundStyle(themeManager.isDarkMode ? gradientLightColor : gradientDarkColor)
                     .padding()
                 

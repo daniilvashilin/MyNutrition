@@ -71,6 +71,9 @@ struct ReadyLoginScreenView: View {
                     .getCustomButtonStyle(width: UIScreen.main.formWidth, height: 45, textColor: .white, backGroundColor: .black, cornerRadius: 10)
                     Button {
                         appState.showRegisterScreen = true
+                        viewModel.email = ""
+                        viewModel.password = ""
+                        viewModel.passwordConfirmation = ""
                     } label: {
                         Text("Register")
                     }
