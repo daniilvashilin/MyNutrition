@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum Page: CaseIterable {
+enum Page: String, CaseIterable {
     case greetings
     case about
     case analytics
@@ -30,9 +30,9 @@ enum Page: CaseIterable {
     
     var description: String {
         switch self {
-        case .greetings: return "Hello! Welcome to MyNutrition. This app helps you track your nutrition and analyze your progress."
-        case .about: return "MyNutrition is easy to use app that helps you track your nutrition and analyze your progress."
-        case .analytics: return "MyNutrition provides you with detailed insights into your nutrition habits."
+        case .greetings: return "This app helps you track your nutrition."
+            case .about: return "Now its easy to stay on the track daily."
+        case .analytics: return "Provides you with detailed insights."
         }
     }
     
@@ -46,10 +46,10 @@ enum Page: CaseIterable {
     
     var nextPage: Page {
         let index = Int(index) + 1
-        if index < 3 {
+        if index < Page.allCases.count {
             return Page.allCases[index]
         }
-        return self
+        return self // Stay on the last page if out of bounds
     }
     
     var previousPage: Page {

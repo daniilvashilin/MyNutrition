@@ -8,59 +8,81 @@
 import SwiftUI
 
 struct WelcomePageView: View {
-    @State var pages: Page = .greetings
+    @State var activePage: Page = .greetings
+    @EnvironmentObject var viewModel: BaseAuthViewModel
     var body: some View {
         GeometryReader { geom in
-            TabView(selection: $pages) {
-                ForEach(Page.allCases, id: \.self) { page in
-                    VStack(alignment: .center) {
-                        HStack {
-                            Button {
-                                pages = page.previousPage
-                            } label: {
-                                Image(systemName: pages == .greetings ? "help.circle" : "arrowshape.backward.fill")
-                                    .font(.custom("backButton", fixedSize: geom.size.width * 0.05))
-                                    .foregroundStyle(.text)
-                            }
-                            .padding()
-                            Spacer()
-                        }
-                        Spacer()
-                        Image(systemName: page.image)
-                            .font(.custom("title", fixedSize: geom.size.width * 0.3))
-                            .padding()
-                        
-                        VStack(alignment: .center) {
-                            Text(page.title)
-                                .font(.custom("title", fixedSize: geom.size.width * 0.07))
-                                .padding()
-                            Text(page.description)
-                                .font(.custom("title", fixedSize: geom.size.width * 0.045))
-                                .lineLimit(3)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(width: geom.size.width * 0.8, height: geom.size.height * 0.2, alignment: .center)
-                        Spacer()
-                        Button {
-                                pages = page.nextPage
-                        } label: {
-                            Text(page == .analytics ? "Get started" : "Continue")
-                                .frame(width: geom.size.width * 0.4, height: geom.size.height * 0.08, alignment: .center)
-                                .background(.textField)
-                                .clipShape(RoundedRectangle(cornerRadius: geom.size.width * 0.1))
-                        }
-                        .animation(.easeInOut(duration: 0.5), value: pages)
-                    }
-                }
+            // page
+            VStack {
+                Spacer()
+                ShapeConfigView(config: .init(font: .system(size: 150, weight: .bold), frame: .init(width: 300, height: 300), radius: 15, foregroundColor: .text, keyFrameDuration: 15), symbol: activePage.image)
+                TextContainer(size: geom.size, activePage: activePage)
+                Spacer()
+                ContinueButton()
+                
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(width: geom.size.width, height: geom.size.height)
         }
     }
-}
-
-
-struct WelcomePagesPreview: PreviewProvider {
-    static var previews: some View {
-        WelcomePageView()
+    
+    // text
+    @ViewBuilder
+    func TextContainer(size: CGSize, activePage: Page) -> some View {
+        VStack(spacing: 8) {
+            // HStack for all titles
+            HStack(spacing: 0) {
+                ForEach(Page.allCases, id: \.rawValue) { page in
+                    Text(page.title)
+                        .font(.title)
+                        .lineLimit(1)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.text)
+                        .kerning(1.1)
+                        .frame(width: size.width) // Each page occupies full width
+                }
+            }
+            .frame(width: size.width, alignment: .leading) // Total HStack width
+            .offset(x: -activePage.index * size.width) // Shift HStack based on active page
+            .animation(.smooth(duration: 0.5), value: activePage) // Animate sliding
+            .multilineTextAlignment(.center)
+            
+            HStack(spacing: 0) {
+                ForEach(Page.allCases, id: \.rawValue) { page in
+                    Text(page.description)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .frame(width: size.width) // Each page occupies full width
+                }
+            }
+            .frame(width: size.width, alignment: .leading) // Total HStack width
+            .offset(x: -activePage.index * size.width) // Shift HStack based on active page
+            .animation(.smooth(duration: 0.7), value: activePage) // Animate sliding
+            .multilineTextAlignment(.center)
+        }
+    }
+    
+    // Button
+    @ViewBuilder
+    func ContinueButton() -> some View {
+        Button {
+            if activePage == .analytics {
+                viewModel.isFirstLogin = false
+            } else {
+                activePage = activePage.nextPage
+            }
+        } label: {
+            Text(activePage == .analytics ? "Get started" : "Continue")
+                .padding()
+                .contentTransition(.identity)
+                .frame(maxWidth: activePage == .analytics ? 220 : 160)
+                .background(.customGreen, in: .capsule)
+                .foregroundStyle(.text)
+        }
+        .padding()
+        .animation(.smooth(duration: 0.5, extraBounce: 0), value: activePage)
     }
 }
+
+
+
+
