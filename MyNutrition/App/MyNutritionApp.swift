@@ -22,38 +22,38 @@ struct MyNutritionApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var nutritionService = NutritionService()
     @StateObject private var healthKitManager = HealthKitManager()
-    @StateObject private var themeManager = ThemeManager()
+//    @StateObject private var themeManager = ThemeManager()
     var body: some Scene {
         WindowGroup {
             NavigationStack {
                 if baseAuthViewModel.isLoading {
                     LoadingScreenView()
-                        .environmentObject(themeManager)
+//                        .environmentObject(themeManager)
                 } else if baseAuthViewModel.isFirstLogin {
                     WelcomePageView()
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
                         .environmentObject(healthKitManager)
-                        .environmentObject(themeManager)
+//                        .environmentObject(themeManager)
                 } else if baseAuthViewModel.isAuthenticated {
                     ReadyFinalMainScreenView()
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
                         .environmentObject(healthKitManager)
-                        .environmentObject(themeManager)
+//                        .environmentObject(themeManager)
                 } else {
                     FinalLoginScreenView()
                         .environmentObject(appState)
                         .environmentObject(nutritionService)
                         .environmentObject(authService)
                         .environmentObject(baseAuthViewModel)
-                        .environmentObject(themeManager)
+//                        .environmentObject(themeManager)
                         .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
             }
-            .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
+//            .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
             .onAppear {
                 Task {
                     do {
