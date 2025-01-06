@@ -9,22 +9,26 @@ import SwiftUI
 
 struct WelcomePageView: View {
     @State var activePage: Page = .greetings
-    @EnvironmentObject var viewModel: BaseAuthViewModel
+    @State var goToHomePage = false
     var body: some View {
-        GeometryReader { geom in
-            // page
-            VStack {
-                Spacer()
-                ShapeConfigView(config: .init(font: .system(size: 150, weight: .bold), frame: .init(width: 300, height: 300), radius: 15, foregroundColor: .text, keyFrameDuration: 15), symbol: activePage.image)
-                TextContainer(size: geom.size, activePage: activePage)
-                Spacer()
-                ContinueButton()
-                
+        NavigationStack {
+            GeometryReader { geom in
+                // page
+                VStack {
+                    Spacer()
+                    ShapeConfigView(config: .init(font: .system(size: 150, weight: .bold), frame: .init(width: 300, height: 300), radius: 15, foregroundColor: .text, keyFrameDuration: 15), symbol: activePage.image)
+                    TextContainer(size: geom.size, activePage: activePage)
+                    Spacer()
+                    ContinueButton()
+                    
+                }
+                .frame(width: geom.size.width, height: geom.size.height)
             }
-            .frame(width: geom.size.width, height: geom.size.height)
+        }
+        .navigationDestination(isPresented: $goToHomePage) {
+            FinalIphoneMainView()
         }
     }
-    
     // text
     @ViewBuilder
     func TextContainer(size: CGSize, activePage: Page) -> some View {
@@ -66,7 +70,7 @@ struct WelcomePageView: View {
     func ContinueButton() -> some View {
         Button {
             if activePage == .analytics {
-                viewModel.isFirstLogin = false
+                goToHomePage = true
             } else {
                 activePage = activePage.nextPage
             }

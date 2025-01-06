@@ -22,7 +22,7 @@ struct ReadyRegisterScreenView: View {
                 .background(Color.backGround.edgesIgnoringSafeArea(.all))
                 .ignoresSafeArea(.keyboard, edges: .bottom)
                 .navigationDestination(isPresented: $isAuthenticated) {
-                    FinalIphoneMainView()
+                    WelcomePageView()
                 }
         }
     }
