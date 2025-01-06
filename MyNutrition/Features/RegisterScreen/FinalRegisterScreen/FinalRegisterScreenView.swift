@@ -13,15 +13,19 @@ struct FinalRegisterScreenView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var authService: AuthService
     @EnvironmentObject var appState: AppState
+
     var body: some View {
         if sizeClass == .compact {
             IPhoneRegisterScreenView(authService: authService, viewModel: viewModel)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
-            autocorrectionDisabled()
+                .autocorrectionDisabled()
         } else if sizeClass == .regular {
             IPadRegisterScreenView(authService: authService, viewModel: viewModel)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
-            autocorrectionDisabled() 
+                .autocorrectionDisabled()
+        } else {
+            Text("Unsupported device size")
+                .foregroundColor(.red)
         }
     }
 }

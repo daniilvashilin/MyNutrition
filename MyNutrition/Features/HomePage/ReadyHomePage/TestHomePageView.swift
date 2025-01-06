@@ -12,6 +12,7 @@ struct TestHomePageView: View {
         ZStack {
             Color.backGround
                 .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea(.all)
             ScrollView {
                 VStack(spacing: 10) {
                     // Убираем GeometryReader из ScrollView, если он не нужен
@@ -40,9 +41,6 @@ struct TestHomePageView: View {
                 }
                 .padding()
             }
-        }
-        .onAppear {
-//            healthKitManager.requestHealthDataAccess()
         }
     }
 }

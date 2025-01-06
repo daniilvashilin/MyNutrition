@@ -11,17 +11,21 @@ struct FinalLoginScreenView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @StateObject private var viewModel = BaseAuthViewModel()
     @EnvironmentObject var authService: AuthService
-      var body: some View {
-          if sizeClass == .compact {
-              IPhoneScreenView(viewModel: viewModel, authService: authService)
-                  .ignoresSafeArea(.keyboard, edges: .bottom)
-              autocorrectionDisabled() 
-          } else if sizeClass == .regular {
-              IPadScreenView(viewModel: viewModel, authService: authService)
-                  .ignoresSafeArea(.keyboard, edges: .bottom)
-              autocorrectionDisabled()
-          }
-      }
-  }
+    var body: some View {
+        if sizeClass == .compact {
+            IPhoneScreenView(viewModel: viewModel, authService: authService)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .autocorrectionDisabled()
+        } else if sizeClass == .regular {
+            IPadScreenView(viewModel: viewModel, authService: authService)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .autocorrectionDisabled()
+        } else {
+            Text("Unsupported device size")
+                .foregroundColor(.red)
+        }
+            
+    }
+}
 
 

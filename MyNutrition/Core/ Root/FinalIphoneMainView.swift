@@ -8,7 +8,10 @@ struct FinalIphoneMainView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
+            ZStack {
+                Color.backGround
+                    .ignoresSafeArea()
+                VStack(spacing: 0) {
                     ZStack {
                         if selectedTabIphone == .home {
                             TestHomePageView(viewModel: viewModel, authservice: authService)
@@ -25,8 +28,9 @@ struct FinalIphoneMainView: View {
                     
                     CustomTabView(selectedTab: $selectedTabIphone)
                         .frame(height: geometry.size.height * 0.15)
+                }
+                .edgesIgnoringSafeArea(.bottom)
             }
-            .edgesIgnoringSafeArea(.bottom)
         }
             
     }

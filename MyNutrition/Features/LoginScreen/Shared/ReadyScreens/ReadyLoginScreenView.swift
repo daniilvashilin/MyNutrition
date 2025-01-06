@@ -113,7 +113,7 @@ struct ReadyLoginScreenView: View {
                                 }
                             }
                         )
-                        .frame(width: 280, height: 45) // Задаём размер кнопки
+                        .frame(width: UIScreen.main.formWidth, height: 45) // Задаём размер кнопки
                         .signInWithAppleButtonStyle(.black) // Задаём стиль кнопки
                         if let error = signInError {
                             Text(error)
