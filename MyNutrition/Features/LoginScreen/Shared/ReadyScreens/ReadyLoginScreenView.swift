@@ -8,7 +8,6 @@ struct ReadyLoginScreenView: View {
     @ObservedObject var authService: AuthService
     @EnvironmentObject var appState: AppState
     @State private var showRegisterScreen = false
-    @State private var isAuthenticated = false
     @State private var signInError: String? = nil
     var showLogo: Bool
     

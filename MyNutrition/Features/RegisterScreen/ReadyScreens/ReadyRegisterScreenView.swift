@@ -4,7 +4,6 @@ import AuthenticationServices
 struct ReadyRegisterScreenView: View {
     @ObservedObject var viewModel: BaseAuthViewModel
     @ObservedObject var authService: AuthService
-    @State private var isAuthenticated = false
     @State private var emailValidationError: String?
     @EnvironmentObject var appState: AppState
     @Environment(\.horizontalSizeClass) var sizeClass
@@ -21,7 +20,7 @@ struct ReadyRegisterScreenView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.backGround.edgesIgnoringSafeArea(.all))
                 .ignoresSafeArea(.keyboard, edges: .bottom)
-                .navigationDestination(isPresented: $isAuthenticated) {
+                .navigationDestination(isPresented: $viewModel.isAuthenticated) {
                     WelcomePageView()
                 }
         }

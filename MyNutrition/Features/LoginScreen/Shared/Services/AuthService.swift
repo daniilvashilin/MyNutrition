@@ -87,7 +87,9 @@ final class AuthService: ObservableObject {
                         "carbsGoal": 0,
                         "sugarGoal": 0,
                         "fiberGoal": 0,
-                        "weightGoal": 0,
+                        "currentWeight": 0, // Добавляем текущее значение веса
+                        "goalWeight": 0,    // Добавляем целевой вес
+                        "weightHistory": [], // Массив истории веса (пустой при создании)
                         "current": [
                             "caloriesConsumed": 0,
                             "proteinConsumed": 0,
@@ -117,6 +119,22 @@ final class AuthService: ObservableObject {
             
             completion(.success(authResult))
         }
+    }
+    
+    func updateWeight(userId: String, newWeight: Double, goalWeight: Double) async throws {
+        let db = Firestore.firestore()
+        let nutritionRef = db.collection("nutrition").document(userId)
+        
+        let newEntry: [String: Any] = [
+            "date": FieldValue.serverTimestamp(),
+            "weight": newWeight
+        ]
+        
+        try await nutritionRef.updateData([
+            "currentWeight": newWeight,
+            "goalWeight": goalWeight,
+            "weightHistory": FieldValue.arrayUnion([newEntry])
+        ])
     }
     
     func decodeIDToken(token: String) -> [String: Any]? {
@@ -246,6 +264,15 @@ final class AuthService: ObservableObject {
         try await FirestoreService.shared.createOrUpdateUserAsync(user: firestoreUser)
         
         let nutritionData: [String: Any] = [
+            "caloriesGoal": 0,
+            "proteinGoal": 0,
+            "fatGoal": 0,
+            "carbsGoal": 0,
+            "sugarGoal": 0,
+            "fiberGoal": 0,
+            "currentWeight": 0, // Добавляем текущее значение веса
+            "goalWeight": 0,    // Добавляем целевой вес
+            "weightHistory": [], // Массив истории веса (пустой при создании)
             "current": [
                 "caloriesConsumed": 0,
                 "proteinConsumed": 0,
@@ -258,15 +285,8 @@ final class AuthService: ObservableObject {
                 "steps": 0
             ],
             "history": [],
-            "caloriesGoal": 0,
-            "proteinGoal": 0,
-            "fatGoal": 0,
-            "carbsGoal": 0,
-            "sugarGoal": 0,
-            "fiberGoal": 0,
-            "weightGoal": 0,
             "lastResetDate": "",
-            "ownerId": user.uid  // связанный uid
+            "ownerId": user.uid
         ]
         
         let db = Firestore.firestore()

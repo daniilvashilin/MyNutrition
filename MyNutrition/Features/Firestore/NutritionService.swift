@@ -47,6 +47,7 @@ final class NutritionService: ObservableObject {
         
         let currentData = data["current"] as? [String: Int] ?? [:]
         let historyData = data["history"] as? [[String: Any]] ?? []
+        let weightHistoryData = data["weightHistory"] as? [[String: Any]] ?? [] // История веса
         
         let nutrition = Nutrition(
             id: userID,
@@ -56,7 +57,15 @@ final class NutritionService: ObservableObject {
             carbsGoal: data["carbsGoal"] as? Double ?? 0,
             sugarGoal: data["sugarGoal"] as? Double ?? 0,
             fiberGoal: data["fiberGoal"] as? Double ?? 0,
-            weightGoal: data["weightGoal"] as? Double ?? 0,
+            goalWeight: data["goalWeight"] as? Double ?? 0, // Целевой вес
+            currentWeight: data["currentWeight"] as? Double ?? 0, // Текущий вес
+            weightHistory: weightHistoryData.compactMap { entry in
+                guard let date = (entry["date"] as? Timestamp)?.dateValue(),
+                      let weight = entry["weight"] as? Double else {
+                    return nil
+                }
+                return Nutrition.WeightEntry(date: date, weight: weight)
+            },
             current: Nutrition.CurrentNutrition(
                 caloriesConsumed: Double(currentData["caloriesConsumed"] ?? 0),
                 proteinConsumed: Double(currentData["proteinConsumed"] ?? 0),
@@ -86,8 +95,9 @@ final class NutritionService: ObservableObject {
                     steps: entry["steps"] as? Double ?? 0
                 )
             },
-            lastResetDate: Date()
+            lastResetDate: (data["lastResetDate"] as? Timestamp)?.dateValue() ?? Date()
         )
+        
         DispatchQueue.main.async {
             self.nutritionData = nutrition
         }

@@ -7,7 +7,7 @@ struct IPhoneDashBoardGroupBoxView: View {
     @State private var showingTip = false
     var body: some View {
         GroupBox {
-            VStack(alignment: .leading, spacing: height * 0.13) {
+            VStack(alignment: .leading, spacing: height * 0.11) {
                 HStack {
                     Text("Calories")
                         .font(.headline)

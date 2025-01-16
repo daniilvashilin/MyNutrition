@@ -36,11 +36,32 @@ class BaseAuthViewModel: ObservableObject {
         authStateListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                let wasAuthenticated = self.isAuthenticated
-                self.isAuthenticated = (user != nil)
-                if wasAuthenticated != self.isAuthenticated {
-                    print("Listener: Authentication state changed: \(self.isAuthenticated)")
+
+                if let user = user {
+                    // Проверяем, существует ли пользователь в Firestore
+                    let db = Firestore.firestore()
+                    let userRef = db.collection("users").document(user.uid)
+
+                    userRef.getDocument { document, error in
+                        if let error = error {
+                            print("Error fetching user document: \(error.localizedDescription)")
+                            self.isAuthenticated = false
+                            return
+                        }
+
+                        if document?.exists == true {
+                            print("User exists in Firestore")
+                            self.isAuthenticated = true
+                        } else {
+                            print("User does not exist in Firestore")
+                            self.isAuthenticated = false
+                            try? Auth.auth().signOut() // Разлогиниваем пользователя
+                        }
+                    }
+                } else {
+                    self.isAuthenticated = false
                 }
+
                 self.isLoading = false
             }
         }
@@ -52,14 +73,6 @@ class BaseAuthViewModel: ObservableObject {
             print("Listener removed in deinit")
         }
     }
-    
-//    func checkAuthenticationStatus() {
-//           if let user = Auth.auth().currentUser {
-//               isAuthenticated = true
-//           } else {
-//               isAuthenticated = false
-//           }
-//       }
     
     // Переписал код, убрав try внутри выражения
     func checkIfFirstLogin() async {

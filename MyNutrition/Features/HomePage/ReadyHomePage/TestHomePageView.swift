@@ -7,29 +7,43 @@ struct TestHomePageView: View {
     @EnvironmentObject var nutritionService: NutritionService
     @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
-    
+    @State var selection = 0
     var body: some View {
         ZStack {
             Color.backGround
                 .edgesIgnoringSafeArea(.all)
                 .ignoresSafeArea(.all)
-            ScrollView {
-                VStack(spacing: 10) {
-                    // Убираем GeometryReader из ScrollView, если он не нужен
+           
+                VStack(spacing: 15) {
                     if UIDevice.current.userInterfaceIdiom == .phone {
-                        IPhoneDashBoardGroupBoxView(
-                            width: UIScreen.main.bounds.width * 0.9, // Используем экранную ширину
-                            height: UIScreen.main.bounds.height * 0.3 // Пропорциональная высота
-                        )
-                        .frame(maxWidth: .infinity) // Задаем максимальную ширину
-                        IPhoneMacrosBoardView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.2)
-                        
-                        Button {
-                            Task {
-                               try authservice.signOut()
+                        HeaderView(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.05)
+                        ScrollView {
+                            TabView(selection: $selection) {
+                                IPhoneDashBoardGroupBoxView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.35)
+                                    .tag(0)
+                                LowCarbsIPhoneView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.35)
+                                    .tag(1)
+                                WeightChartView(width: UIScreen.main.bounds.width * 0.9 , height: UIScreen.main.bounds.height * 0.35)
                             }
-                        } label: {
-                            Text("Signout")
+                            .tabViewStyle(.page(indexDisplayMode: .never))
+                            .frame(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.35)
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            HStack {
+                                ForEach(0..<3, id: \.self) { index in
+                                    Circle()
+                                        .fill(selection == index ? .circleGreen : .secondary)
+                                        .frame(width: UIScreen.main.bounds.width * 0.02)
+                                }
+                            }
+                            IPhoneMacrosBoardView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.2)
+                            ////                        Button {
+                            ////                            Task {
+                            ////                               try authservice.signOut()
+                            ////                            }
+                            ////                        } label: {
+                            ////                            Text("Signout")
+                            ////                        }
+                            ///
                         }
                     } else if UIDevice.current.userInterfaceIdiom == .pad {
                         if verticalSizeClass == .regular {
@@ -40,7 +54,7 @@ struct TestHomePageView: View {
                     }
                 }
                 .padding()
-            }
+             // here
         }
     }
 }

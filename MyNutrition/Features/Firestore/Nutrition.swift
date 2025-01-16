@@ -8,11 +8,12 @@ struct Nutrition: Identifiable {
     var carbsGoal: Double
     var sugarGoal: Double
     var fiberGoal: Double
-    var weightGoal: Double
+    var goalWeight: Double // Целевой вес
+    var currentWeight: Double // Текущий вес
+    var weightHistory: [WeightEntry] // История веса
     var current: CurrentNutrition
     var history: [DailyNutrition]
     var lastResetDate: Date
-//    var isFirstLogin: Bool
 
     struct CurrentNutrition {
         var caloriesConsumed: Double
@@ -37,5 +38,11 @@ struct Nutrition: Identifiable {
         var move: Double
         var exerciseMinutes: Double
         var steps: Double
+    }
+
+    struct WeightEntry: Identifiable {
+        var id: String = UUID().uuidString // Уникальный идентификатор записи
+        var date: Date // Дата записи веса
+        var weight: Double // Значение веса
     }
 }
