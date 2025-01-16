@@ -120,21 +120,46 @@ final class AuthService: ObservableObject {
             completion(.success(authResult))
         }
     }
+//    
+//    func updateWeight(userId: String, newWeight: Double, goalWeight: Double) async throws {
+//        let db = Firestore.firestore()
+//        let nutritionRef = db.collection("nutrition").document(userId)
+//        
+//        let newEntry: [String: Any] = [
+//            "date": FieldValue.serverTimestamp(),
+//            "weight": newWeight
+//        ]
+//        
+//        try await nutritionRef.updateData([
+//            "currentWeight": newWeight,
+//            "goalWeight": goalWeight,
+//            "weightHistory": FieldValue.arrayUnion([newEntry])
+//        ])
+//    }
     
-    func updateWeight(userId: String, newWeight: Double, goalWeight: Double) async throws {
+    func addWeightEntry(newWeight: Double) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
+        }
+
         let db = Firestore.firestore()
         let nutritionRef = db.collection("nutrition").document(userId)
-        
+
+        // Создаем новую запись веса с текущей датой
         let newEntry: [String: Any] = [
-            "date": FieldValue.serverTimestamp(),
+            "date": Date(), // Текущая дата
             "weight": newWeight
         ]
-        
-        try await nutritionRef.updateData([
-            "currentWeight": newWeight,
-            "goalWeight": goalWeight,
-            "weightHistory": FieldValue.arrayUnion([newEntry])
-        ])
+
+        do {
+            try await nutritionRef.updateData([
+                "weightHistory": FieldValue.arrayUnion([newEntry])
+            ])
+            print("Weight added successfully!")
+        } catch {
+            print("Error adding weight: \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func decodeIDToken(token: String) -> [String: Any]? {

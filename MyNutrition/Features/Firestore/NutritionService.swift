@@ -40,6 +40,11 @@ final class NutritionService: ObservableObject {
     
     func fetchNutritionData(for userID: String) async throws {
         let document = try await db.collection("nutrition").document(userID).getDocument()
+        let userID = userID ?? (Auth.auth().currentUser?.uid)
+           
+           guard let userID = userID else {
+               throw NSError(domain: "NutritionService", code: -1, userInfo: [NSLocalizedDescriptionKey: "User ID not found"])
+           }
         
         guard let data = document.data() else {
             throw NSError(domain: "FirestoreError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document not found"])

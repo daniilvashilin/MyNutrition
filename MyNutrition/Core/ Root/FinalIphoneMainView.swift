@@ -5,7 +5,7 @@ struct FinalIphoneMainView: View {
     @EnvironmentObject var nutritionService: NutritionService
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var viewModel: BaseAuthViewModel
-
+    @State var isAddPressed = false
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -26,10 +26,13 @@ struct FinalIphoneMainView: View {
                     }
                     .frame(width: geometry.size.width ,height: geometry.size.height * 0.85)
                     
-                    CustomTabView(selectedTab: $selectedTabIphone)
+                    CustomTabView(selectedTab: $selectedTabIphone, addButtonPressed: $isAddPressed)
                         .frame(height: geometry.size.height * 0.15)
                 }
                 .edgesIgnoringSafeArea(.bottom)
+            }
+            .sheet(isPresented: $isAddPressed) {
+                AddWeightView()
             }
         }
             
