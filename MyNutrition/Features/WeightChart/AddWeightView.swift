@@ -13,7 +13,7 @@ struct AddWeightView: View {
     @EnvironmentObject var nutritionService: NutritionService
     @EnvironmentObject var authservice: AuthService
     @State private var weight: String = ""
-    
+    @Binding var closeTab: Bool
     var body: some View {
         VStack {
             TextField("Enter your weight", text: $weight)
@@ -28,7 +28,6 @@ struct AddWeightView: View {
                         do {
                             try await authservice.addWeightEntry(newWeight: weightValue)
                             print("Weight added successfully!")
-                            // Обновляем данные, используя текущего пользователя
                             if let userID = Auth.auth().currentUser?.uid {
                                 try await nutritionService.fetchNutritionData(for: userID)
                             } else {
@@ -41,6 +40,7 @@ struct AddWeightView: View {
                 } else {
                     print("Invalid weight entered")
                 }
+                closeTab = false
             }
             .buttonStyle(.borderedProminent)
         }

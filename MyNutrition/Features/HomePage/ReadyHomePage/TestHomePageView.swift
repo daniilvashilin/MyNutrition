@@ -7,6 +7,7 @@ struct TestHomePageView: View {
     @EnvironmentObject var nutritionService: NutritionService
     @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    @State var isAddPressed = false
     @State var selection = 0
     var body: some View {
         ZStack {
@@ -23,11 +24,14 @@ struct TestHomePageView: View {
                                     .tag(0)
                                 LowCarbsIPhoneView(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.35)
                                     .tag(1)
-                                WeightChartView(width: UIScreen.main.bounds.width * 0.9 , height: UIScreen.main.bounds.height * 0.35)
+                                WeightChartView(width: UIScreen.main.bounds.width * 0.9 , height: UIScreen.main.bounds.height * 0.35, addButtonPressed: $isAddPressed)
+                                    .tag(2)
                             }
                             .tabViewStyle(.page(indexDisplayMode: .never))
                             .frame(width: UIScreen.main.bounds.width * 0.9, height: UIScreen.main.bounds.height * 0.35)
                             .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .animation(nil, value: selection)
+                            
                             HStack {
                                 ForEach(0..<3, id: \.self) { index in
                                     Circle()
@@ -44,6 +48,9 @@ struct TestHomePageView: View {
                             ////                            Text("Signout")
                             ////                        }
                             ///
+                        }
+                        .sheet(isPresented: $isAddPressed) {
+                            AddWeightView(closeTab: $isAddPressed)
                         }
                     } else if UIDevice.current.userInterfaceIdiom == .pad {
                         if verticalSizeClass == .regular {

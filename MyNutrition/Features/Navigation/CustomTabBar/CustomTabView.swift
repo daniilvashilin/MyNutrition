@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CustomTabView: View {
     @Binding var selectedTab: NavigationTabModel.TableViewSection
-    @Binding var addButtonPressed: Bool
+    @Binding var showAddPage: Bool
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 25)
@@ -30,7 +30,7 @@ struct CustomTabView: View {
                     .animation(.spring(), value: tab)
                 }
                 Button {
-                    addButtonPressed = true
+                    showAddPage = true
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.green.gradient)

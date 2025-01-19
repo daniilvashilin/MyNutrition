@@ -3,94 +3,73 @@ import Charts
 
 struct WeightChartView: View {
     @EnvironmentObject var nutritionService: NutritionService
-    @State private var selectedRange: WeightRange = .week
-
     var width: CGFloat
     var height: CGFloat
-
+    @Binding var addButtonPressed: Bool
     var filteredWeightHistory: [WeightEntry] {
         guard let data = nutritionService.nutritionData else { return [] }
         let convertedHistory = data.weightHistory.map { $0.toWeightEntry() }
-        return filterWeightHistory(for: selectedRange, history: convertedHistory)
-            .sorted(by: { $0.date < $1.date }) // Сортировка по возрастанию даты
+        var history = convertedHistory.sorted(by: { $0.date < $1.date })
+        let today = Date()
+        if let lastEntry = history.last, !Calendar.current.isDate(lastEntry.date, inSameDayAs: today) {
+            history.append(WeightEntry(date: today, weight: lastEntry.weight))
+        }
+        
+        return history
     }
 
     var body: some View {
         GroupBox {
-            VStack {
+            VStack(alignment: .leading) {
                 HStack {
-                    Text("Weight Progress")
+                    Text("Weight")
                         .font(.headline)
+                    Text("Last 90 days")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                     Spacer()
+                    Button {
+                        addButtonPressed = true
+                    } label: {
+                        Text("+")
+                            .foregroundStyle(.text)
+                            .font(.headline.bold())
+                    }
                 }
-                .padding(.horizontal)
-
-                Picker("Range", selection: $selectedRange) {
-                    Text("Week").tag(WeightRange.week)
-                    Text("Month").tag(WeightRange.month)
-                    Text("Year").tag(WeightRange.year)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .animation(nil, value: selectedRange)
-
+                
                 Chart {
                     ForEach(filteredWeightHistory) { entry in
                         LineMark(
                             x: .value("Date", entry.date),
                             y: .value("Weight", entry.weight)
                         )
-                        .interpolationMethod(.catmullRom)
-                    }
-
-                    if let firstEntry = filteredWeightHistory.first {
-                        PointMark(
-                            x: .value("Date", firstEntry.date),
-                            y: .value("Weight", firstEntry.weight)
-                        )
-                        .symbol(Circle())
                         .foregroundStyle(.green)
-                        .symbolSize(50)
                     }
 
-                    if let lastEntry = filteredWeightHistory.last {
+                    ForEach(filteredWeightHistory) { entry in
                         PointMark(
-                            x: .value("Date", lastEntry.date),
-                            y: .value("Weight", lastEntry.weight)
+                            x: .value("Date", entry.date),
+                            y: .value("Weight", entry.weight)
                         )
                         .symbol(Circle())
-                        .foregroundStyle(.blue)
-                        .symbolSize(50)
-                    }
-
-                    if let data = nutritionService.nutritionData {
-                        RuleMark(
-                            y: .value("Target Weight", data.goalWeight)
-                        )
-                        .foregroundStyle(.red)
+                        .symbolSize(10)
+                        .foregroundStyle(.green)
                     }
                 }
-//                .chartXScale(domain: filteredWeightHistory.first?.date ?? Date()...filteredWeightHistory.last?.date ?? Date())
                 .chartXAxis {
-                    AxisMarks(values: filteredWeightHistory.map { $0.date }) { value in
+                    AxisMarks(values: generateXAxisDates(from: filteredWeightHistory)) { value in
                         if let dateValue = value.as(Date.self) {
-                            switch selectedRange {
-                            case .week:
-                                AxisValueLabel(format: .dateTime.day().month(.abbreviated)) // "15 Jan"
-                            case .month:
-                                AxisValueLabel(format: .dateTime.month(.abbreviated)) // "Jan"
-                            case .year:
-                                AxisValueLabel(format: .dateTime.year()) // "2025"
-                            }
+                            AxisValueLabel(format: .dateTime.day().month(.abbreviated))
                         }
                     }
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading) {
+                        AxisGridLine()
                         AxisValueLabel()
                     }
                 }
-                .padding()
+                .frame(height: height * 0.7)
             }
         }
         .frame(width: width, height: height)
@@ -102,23 +81,26 @@ struct WeightChartView: View {
     }
 }
 
-// Функция для фильтрации данных
-func filterWeightHistory(for range: WeightRange, history: [WeightEntry]) -> [WeightEntry] {
-    let calendar = Calendar.current
-    let now = Date()
-    
-    switch range {
-    case .week:
-        let weekAgo = calendar.date(byAdding: .day, value: -7, to: now) ?? now
-        return history.filter { $0.date >= weekAgo }
-    case .month:
-        let monthAgo = calendar.date(byAdding: .month, value: -1, to: now) ?? now
-        return history.filter { $0.date >= monthAgo }
-    case .year:
-        let yearAgo = calendar.date(byAdding: .year, value: -1, to: now) ?? now
-        return history.filter { $0.date >= yearAgo }
+func generateXAxisDates(from history: [WeightEntry]) -> [Date] {
+    guard let firstDate = history.first?.date, let lastDate = history.last?.date else {
+        return []
     }
+    
+    let calendar = Calendar.current
+    var dates: [Date] = []
+    
+    let interval = (calendar.dateComponents([.day], from: firstDate, to: lastDate).day ?? 1) / 4
+    var currentDate = firstDate
+    
+    while currentDate <= lastDate {
+        dates.append(currentDate)
+        currentDate = calendar.date(byAdding: .day, value: interval, to: currentDate) ?? lastDate
+    }
+    
+    dates.append(lastDate)
+    return dates
 }
+
 
 struct WeightEntry: Identifiable, Codable {
     var id: String = UUID().uuidString
@@ -126,13 +108,6 @@ struct WeightEntry: Identifiable, Codable {
     var weight: Double
 }
 
-enum WeightRange {
-    case week
-    case month
-    case year
-}
-
-// Преобразование `Nutrition.WeightEntry` в глобальный `WeightEntry`
 extension Nutrition.WeightEntry {
     func toWeightEntry() -> WeightEntry {
         return WeightEntry(
@@ -142,5 +117,3 @@ extension Nutrition.WeightEntry {
         )
     }
 }
-
-
